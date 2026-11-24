@@ -70,7 +70,6 @@ func collectScan() ScanResult {
 		Meta: scanMeta(),
 		Categories: []Category{
 			scanDotfiles(),
-			scanHomebrew(),
 			scanVSCode(),
 			scanRuntimes(),
 			scanGlobalPackages(),

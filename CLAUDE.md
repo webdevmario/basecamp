@@ -1,8 +1,9 @@
 # basecamp: notes for Claude sessions
 
 Mac inventory and health dashboard for Mario's Mac mini: a Go CLI scans the machine (dotfiles,
-Homebrew, VS Code, runtimes, global packages, fonts, macOS defaults, SSH keys, services) into JSON,
-and a React + Vite dashboard shows it with health scores, per-item notes and a setup playbook.
+VS Code, runtimes, global packages, fonts, macOS defaults, SSH keys, services) into JSON, and a
+React + Vite dashboard shows it with health scores, per-item notes and a setup playbook. It also
+checks scheduled jobs and backups (Jobs tab) and keeps configs in a private repo (Configs tab).
 
 **The GitHub repo is public.** Never commit a scan, the compiled binary, or anything read from this
 Mac (paths, hostnames, keys, dotfile contents).
@@ -56,25 +57,22 @@ Mac (paths, hostnames, keys, dotfile contents).
 - Status values the UI understands: `active`, `current`, `running` (good), `outdated`, `stale`
   (count as issues and lower the score).
 
-## Open work (as of 2026-11-24)
+## Open work (as of 2026-11-24, evening)
 
-1. **Merge order:** PR #2 (pass 1) first, then #1 (dotfiles, stacked on #2) and #3 (jobs,
-   rebased on #2). Before `git pull` in the main checkout, move aside its local edits to
-   `web/public/scan.json` and `cli/basecamp`, which #2 deletes. Public history: Mario decided on
-   2026-11-24 to leave the old scan and binary in history (no secrets in them).
-2. **`basecamp diff`** is not built (the old README called it "coming soon").
-3. **Parallel branches:** config tracking (`basecamp-dotfiles`) builds on `basecamp serve` and
-   registers its routes with one line in `runServe`. The Jobs view (PR #3) is stacked on PR #2 and
-   is what is deployed on the mini now; redeploying from a branch without it removes the jobs
-   routes and breaks `com.basecamp-jobs`.
-4. **Cleanup the scan points at** (Mario's machine, not code): Node 15/16/18/20/23 under nvm are
-   end-of-life, 22 brew packages outdated, mongodb-community installed but not running, a leftover
-   "VPN by Google One" launch agent, Remote WSL and three Docker extensions in VS Code, a
-   5.4-year-old SSH key.
-5. **What the first jobs scan found** (other projects, not this repo): borrowd has no
-   `backups/` folder yet so `local.borrowd.nightly` is red until its backup step lands;
-   diecast-scout dumps aren't in the offsite image; stacks-backup, borrowd, rankd, stacks and
-   tatertot log to `/tmp`; `com.springboard.plist` has an unescaped `&&`; no job writes a status
-   file yet (docs/jobs.md shows how).
-6. Not verified in a browser: the playbook's "Download .sh" button (the Claude app's pane blocks
-   downloads). Copy, notes, Run Scan and the version compare were checked on 2026-11-24.
+Everything from the first passes is merged and deployed (PRs #1 to #4): `basecamp serve` on :3050,
+hourly scan, Jobs check every 15 minutes, dotfiles saved and pushed at 03:00. The first Jobs scan's
+findings are all fixed in the other repos (logs out of `/tmp`, diecast-scout in the offsite image,
+Springboard's plist); on 2026-11-24 it reported all 23 jobs fine.
+
+1. **Cleanup the scan points at** (Mario's machine, not code): Node 15/16/18/20/23 under nvm are
+   end-of-life, mongodb-community installed but not running, a leftover "VPN by Google One" launch
+   agent, Remote WSL and three Docker extensions in VS Code, a 5.4-year-old SSH key.
+2. **`basecamp diff`** (compare two scans) is not built.
+3. **Status files:** no job writes one yet (`docs/jobs.md` shows how), so the Jobs tab reads logs.
+   Optional; the nightly backups would benefit most.
+4. Not verified in a browser: the playbook's "Download .sh" button (the Claude app's pane blocks
+   downloads).
+
+Decided, so don't redo: no Homebrew section (Mario, 2026-11-24: the Homebrew app,
+`/Applications/Homebrew.app`, manages and updates packages). The Brewfile stays in the dotfiles
+backup and the playbook installs from it. Public history: left as is (2026-11-24, no secrets in it).

@@ -2,7 +2,7 @@
 
 A developer environment inventory, health dashboard, and setup playbook generator for macOS.
 
-It scans dotfiles, Homebrew, VS Code extensions, runtimes (nvm, pyenv, uv, rbenv, Go, Rust, Bun,
+It scans dotfiles, VS Code extensions, runtimes (nvm, pyenv, uv, rbenv, Go, Rust, Bun,
 Deno), global packages, fonts, macOS defaults, SSH keys and background services, then shows what
 is outdated or likely left over, keeps your notes per item, and writes a bash script that would
 set up a new Mac the same way.
@@ -96,7 +96,7 @@ live scan and notes.
 - **Jobs** (`/#jobs`): every scheduled LaunchAgent, its last run and result, a timeline of the
   night, log tails, and whether each backup is fresh and reaches the offsite image. See
   [docs/jobs.md](docs/jobs.md).
-- **Export Playbook**: a bash script that reinstalls your brew packages, VS Code extensions, macOS
+- **Export Playbook**: a bash script that reinstalls your Homebrew packages (from the saved Brewfile), VS Code extensions, macOS
   defaults and runtimes. Copy it or download it as a `.sh`.
 
 ## Configs (dotfiles)
