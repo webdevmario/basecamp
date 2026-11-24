@@ -1,0 +1,26 @@
+{
+  "staleAfterHours": 48,
+  "offsite": {
+    "label": "com.example.offsite-backup",
+    "dir": "~/Library/Mobile Documents/com~apple~CloudDocs/Backups/Offsite",
+    "pattern": "^offsite-\\d{8}\\.dmg$",
+    "script": "~/Library/Application Support/offsite-backup/offsite-backup.mjs"
+  },
+  "jobs": {
+    "com.example.notes-backup": {
+      "snapshots": [
+        { "dir": "~/Documents/development/projects/notes/backups", "pattern": "^notes-\\d{8}\\.db$" }
+      ]
+    },
+    "com.example.postgres-backup": {
+      "snapshots": [
+        { "dir": "~/Backups/postgres", "pattern": "^app-\\d{8}-\\d{6}-nightly\\.dump$" },
+        { "dir": "~/Backups/postgres", "pattern": "^other-\\d{8}-\\d{6}-nightly\\.dump$", "offsite": false }
+      ]
+    },
+    "local.example.nightly": {
+      "log": "~/Library/Application Support/example/logs/nightly-*.log"
+    }
+  },
+  "thirdParty": ["com.example-vendor."]
+}

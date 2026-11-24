@@ -37,12 +37,13 @@ Scans contain an inventory of your machine. They live in `~/.basecamp/`, outside
 scripts/install-service.sh
 ```
 
-This builds the CLI and the dashboard into `~/.basecamp/app` and installs two launchd jobs:
+This builds the CLI and the dashboard into `~/.basecamp/app` and installs three launchd jobs:
 
 | Job | What it does |
 |---|---|
 | `com.basecamp` | `basecamp serve` on port 3050, restarted if it stops |
 | `com.basecamp-scan` | `basecamp scan` at login and every hour, into `~/.basecamp/scan.json` |
+| `com.basecamp-jobs` | `basecamp jobs` at login and every 15 minutes, into `~/.basecamp/jobs.json`; notifies when a job turns red |
 
 The server only answers tailnet (Tailscale) and localhost clients. Re-run the script after pulling
 changes; `scripts/install-service.sh --remove` uninstalls (your data in `~/.basecamp` stays).
@@ -64,6 +65,7 @@ live scan and notes.
 | `basecamp scan -pretty` | Pretty-printed JSON |
 | `basecamp scan -o file.json` | Write to a file (atomically) |
 | `basecamp serve` | Serve the dashboard and API (`-addr :3050`, `-web dir`, `-data ~/.basecamp`) |
+| `basecamp jobs` | Check scheduled jobs and backups into `~/.basecamp/jobs.json` ([docs/jobs.md](docs/jobs.md)) |
 
 ## Server API
 
@@ -73,6 +75,8 @@ live scan and notes.
 | `POST /api/scan` | Scan now, save it, return it (the dashboard's Run Scan button) |
 | `GET /api/health` | `{"ok": true, "scanUpdated": ...}` |
 | `GET` / `PUT /api/notes` | Per-item notes, stored in `~/.basecamp/notes.json` |
+| `GET /jobs.json` | The latest jobs report (Jobs tab) |
+| `GET /api/jobs/status` | One green/red answer for Springboard, CORS open |
 
 ## Dashboard
 
@@ -81,5 +85,8 @@ live scan and notes.
 - **Notes**: the ＋ on any row. Saved on the server, so every device sees the same notes.
 - **Runtimes**: click a runtime with several versions (nvm, pyenv) to compare their global packages
   and get the command that copies missing ones over.
+- **Jobs** (`/#jobs`): every scheduled LaunchAgent, its last run and result, a timeline of the
+  night, log tails, and whether each backup is fresh and reaches the offsite image. See
+  [docs/jobs.md](docs/jobs.md).
 - **Export Playbook**: a bash script that reinstalls your brew packages, VS Code extensions, macOS
   defaults and runtimes. Copy it or download it as a `.sh`.
