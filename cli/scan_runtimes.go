@@ -224,7 +224,7 @@ func listNPMGlobals(nodeModulesDir string) []string {
 		return nil
 	}
 
-	var globals []string
+	globals := []string{} // never null in JSON: the UI iterates it
 	for _, entry := range entries {
 		name := entry.Name()
 		// Skip npm itself and hidden dirs
@@ -348,7 +348,7 @@ func listPipGlobals(version string) []string {
 	}
 
 	lines := runLines(pipBin, "list", "--format=freeze")
-	var globals []string
+	globals := []string{} // never null in JSON: the UI iterates it
 	for _, line := range lines {
 		// Format: package==version
 		line = strings.TrimSpace(line)

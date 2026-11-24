@@ -1,26 +1,27 @@
 import React, { useState } from 'react';
+import { splitPkg } from './playbook';
 
 export default function VersionDetail({ item, onClose }) {
   const [activeIdx, setActiveIdx] = useState(0);
 
   if (!item?.versions) return null;
 
-  const pkgName = (s) => s.split('@')[0];
-  const pkgVer = (s) => s.split('@')[1] || '';
+  const pkgName = (s) => splitPkg(s).name;
+  const pkgVer = (s) => splitPkg(s).version;
 
   const primary = item.versions[0];
   const selected = item.versions[activeIdx];
   const isCurrent = activeIdx === 0;
 
   const primaryPkgs = {};
-  primary.globals.forEach(g => { primaryPkgs[pkgName(g)] = pkgVer(g); });
+  (primary.globals || []).forEach(g => { primaryPkgs[pkgName(g)] = pkgVer(g); });
 
   const selectedPkgs = {};
-  selected.globals.forEach(g => { selectedPkgs[pkgName(g)] = pkgVer(g); });
+  (selected.globals || []).forEach(g => { selectedPkgs[pkgName(g)] = pkgVer(g); });
 
   let rows = [];
   if (isCurrent) {
-    rows = primary.globals.map(g => ({
+    rows = (primary.globals || []).map(g => ({
       name: pkgName(g), version: pkgVer(g), status: 'installed',
     })).sort((a, b) => a.name.localeCompare(b.name));
   } else {
@@ -91,8 +92,8 @@ export default function VersionDetail({ item, onClose }) {
               {item.versions.map((v, i) => {
                 let gapCount = 0;
                 if (i > 0) {
-                  const thisPkgs = new Set(v.globals.map(pkgName));
-                  gapCount = primary.globals.filter(g => !thisPkgs.has(pkgName(g))).length;
+                  const thisPkgs = new Set((v.globals || []).map(pkgName));
+                  gapCount = (primary.globals || []).filter(g => !thisPkgs.has(pkgName(g))).length;
                 }
                 const label = v.version + (v.label ? ` (${v.label})` : '') + (gapCount > 0 ? ` · ${gapCount} missing` : '');
                 return <option key={v.version} value={i}>{label}</option>;
@@ -148,7 +149,7 @@ export default function VersionDetail({ item, onClose }) {
                   )}
                 </div>
                 <div style={{ textAlign: 'center', fontFamily: "'JetBrains Mono'", fontSize: 11, color: row.status === 'missing' ? 'var(--fg4)' : 'var(--fg3)' }}>
-                  {row.version || '—'}
+                  {row.version || '-'}
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'center' }}>
                   {!isCurrent && (

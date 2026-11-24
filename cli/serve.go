@@ -18,6 +18,7 @@ import (
 //	GET  /scan.json    latest scan (dataDir/scan.json)
 //	POST /api/scan     run a scan now, save it, return it
 //	GET  /api/health   liveness plus when the last scan ran
+//	GET/PUT /api/notes per-item notes (notes_http.go)
 //	GET  /*            the dashboard (webDir)
 func runServe(addr, webDir, dataDir string) {
 	dataDir = expandHome(dataDir)
@@ -60,6 +61,8 @@ func runServe(addr, webDir, dataDir string) {
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(resp)
 	})
+
+	registerNotesRoutes(mux, dataDir)
 
 	if webDir != "" {
 		webDir = expandHome(webDir)

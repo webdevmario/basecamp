@@ -1,8 +1,8 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { ScoreRing, StatusBadge, INSIGHT_ICONS } from './components';
+import { ScoreRing, StatusBadge, INSIGHT_ICONS, PlaybookActions } from './components';
 import { assessCategory, globalHealth, totalIssues } from './health';
 import { generatePlaybook } from './playbook';
-import { loadNotes, saveNotes, getNote, setNote } from './notes';
+import { useNotes, getNote, setNote } from './notes';
 import NoteModal from './NoteModal';
 import VersionDetail from './VersionDetail';
 
@@ -23,7 +23,7 @@ export default function App() {
   const [scanning, setScanning] = useState(false);
   const [modalItem, setModalItem] = useState(null);
   const [versionItem, setVersionItem] = useState(null);
-  const [notes, setNotes] = useState(loadNotes());
+  const [notes, setNotes] = useNotes();
 
   // Load scan data
   useEffect(() => {
@@ -43,9 +43,6 @@ export default function App() {
         setError(err.message);
       });
   }, []);
-
-  // Persist notes
-  useEffect(() => { saveNotes(notes); }, [notes]);
 
   const cat = data?.categories?.find(c => c.id === activeCat);
 
@@ -74,11 +71,11 @@ export default function App() {
     setNotes(next);
   };
 
-  const simulateScan = () => {
+  // Asks basecamp serve to scan now; without a server, just reloads the last scan.
+  const runScan = () => {
     setScanning(true);
-    // In production, this would call the CLI and reload
-    // For now, just re-fetch
-    fetch('/scan.json')
+    fetch('/api/scan', { method: 'POST' })
+      .then(r => r.ok ? r : fetch('/scan.json', { cache: 'no-store' }))
       .then(r => r.ok ? r.json() : Promise.reject())
       .then(d => { setData(d); setScanning(false); })
       .catch(() => setScanning(false));
@@ -165,7 +162,7 @@ export default function App() {
           <div style={{ fontSize: 10, color: 'var(--fg4)', textAlign: 'center', marginBottom: 2 }}>
             Last scan: {new Date(data.meta.lastScan).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
           </div>
-          <button onClick={simulateScan} disabled={scanning} style={{
+          <button onClick={runScan} disabled={scanning} style={{
             width: '100%', padding: '9px 0', borderRadius: 7, border: '1px solid var(--border2)',
             background: scanning ? 'var(--accent-bg)' : 'var(--card2)',
             color: scanning ? 'var(--accent)' : 'var(--fg)',
@@ -203,14 +200,16 @@ export default function App() {
               }}>
 {`cd cli
 go build -o basecamp .
-./basecamp scan --pretty > ../web/public/scan.json`}
+./basecamp scan -o ~/.basecamp/scan.json
+./basecamp serve`}
               </pre>
             </div>
           </div>
         ) : showPlaybook ? (
           <div className="slide-in" style={{ padding: 32, maxWidth: 780 }}>
             <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 4 }}>Setup Playbook</h2>
-            <p style={{ fontSize: 13, color: 'var(--fg3)', marginBottom: 20 }}>Generated from inventory · stale items excluded</p>
+            <p style={{ fontSize: 13, color: 'var(--fg3)', marginBottom: 12 }}>Generated from inventory · stale items excluded</p>
+            <PlaybookActions script={playbook} hostname={data.meta.hostname} />
             <pre style={{
               background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 10,
               padding: 20, fontSize: 12, lineHeight: 1.7, color: 'var(--fg2)', overflow: 'auto',
@@ -296,7 +295,7 @@ go build -o basecamp .
 
                 {filteredItems.length === 0 ? (
                   <div style={{ padding: 28, textAlign: 'center', color: 'var(--fg3)', fontSize: 13 }}>
-                    {filterIssues ? 'No issues — looking good' : 'No items in this category'}
+                    {filterIssues ? 'No issues, looking good' : 'No items in this category'}
                   </div>
                 ) : filteredItems.map((item, i) => {
                   const hasVersions = item.versions?.length > 1;
@@ -330,7 +329,7 @@ go build -o basecamp .
                       </div>
 
                       <div style={{ fontSize: 12, color: 'var(--fg2)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', lineHeight: 1.4 }}>
-                        {item.systemNote || '—'}
+                        {item.systemNote || '-'}
                       </div>
 
                       <div style={{ display: 'flex', justifyContent: 'center' }}>

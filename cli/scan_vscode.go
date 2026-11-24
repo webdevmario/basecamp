@@ -9,7 +9,7 @@ func scanVSCode() Category {
 	if !commandExists("code") {
 		return Category{
 			ID: "vscode", Label: "VS Code", Icon: "💎",
-			Desc:  "VS Code CLI not found — install 'code' command from VS Code",
+			Desc:  "VS Code CLI not found: install the 'code' command from VS Code",
 			Items: nil,
 		}
 	}

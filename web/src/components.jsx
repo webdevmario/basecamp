@@ -46,3 +46,41 @@ export function StatusBadge({ status }) {
 export const INSIGHT_ICONS = {
   cleanup: '🧹', update: '⬆️', observe: '👁', security: '🛡',
 };
+
+// Copy and download buttons for the generated setup playbook.
+export function PlaybookActions({ script, hostname }) {
+  const [copied, setCopied] = React.useState(false);
+  const copy = () => {
+    const done = () => { setCopied(true); setTimeout(() => setCopied(false), 1500); };
+    // Plain http over the tailnet isn't a secure context, so there may be no Clipboard API,
+    // or it may refuse: fall back to the old textarea copy.
+    const fallback = () => {
+      const ta = Object.assign(document.createElement('textarea'), { value: script });
+      document.body.appendChild(ta);
+      ta.select();
+      if (document.execCommand('copy')) done();
+      ta.remove();
+    };
+    if (navigator.clipboard) navigator.clipboard.writeText(script).then(done, fallback);
+    else fallback();
+  };
+  const download = () => {
+    const url = URL.createObjectURL(new Blob([script], { type: 'text/x-shellscript' }));
+    const a = Object.assign(document.createElement('a'), {
+      href: url,
+      download: `basecamp-playbook-${(hostname || 'mac').toLowerCase()}.sh`,
+    });
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+  const btn = {
+    padding: '7px 12px', fontSize: 12, fontWeight: 600, cursor: 'pointer', borderRadius: 7,
+    border: '1px solid var(--border2)', background: 'var(--card2)', color: 'var(--fg)', fontFamily: 'inherit',
+  };
+  return (
+    <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
+      <button style={btn} onClick={copy}>{copied ? 'Copied' : 'Copy'}</button>
+      <button style={btn} onClick={download}>Download .sh</button>
+    </div>
+  );
+}

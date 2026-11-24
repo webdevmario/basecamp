@@ -13,7 +13,7 @@ Mac (paths, hostnames, keys, dotfile contents).
   returns a `Category`), `types.go` (JSON shape), `helpers.go` (`run`, `runLines`, file helpers),
   `serve.go` (HTTP server).
 - `web/`: React 19 + Vite. `App.jsx` (everything on screen), `health.js` (scores and observations),
-  `playbook.js` (bash setup script), `notes.js` (per-item notes in `localStorage`),
+  `playbook.js` (bash setup script), `notes.js` (per-item notes, saved through `/api/notes`),
   `VersionDetail.jsx` (nvm/pyenv versions compared), `NoteModal.jsx`.
 - `scripts/install-service.sh`: builds and installs the launchd jobs.
 
@@ -36,10 +36,13 @@ Mac (paths, hostnames, keys, dotfile contents).
 
 - launchd jobs get a bare environment. Both plists source `~/.nvm/nvm.sh` and set PATH (Homebrew,
   `/usr/local/bin` for `code`) and `SHELL`, or the scan misses nvm Node, brew and VS Code.
-- `run()` in `helpers.go` has no timeout; a hung command (an `osascript` permission prompt, a slow
-  `brew outdated`) hangs the whole scan.
-- `web/node_modules` is committed, so `npm ci` shows deleted files in git. `git checkout --
-  web/node_modules` undoes it until it is untracked.
+- `run()` in `helpers.go` kills any command after 60s (`commandTimeout`), so a hung tool (an
+  `osascript` permission prompt) leaves that category short instead of hanging the scan.
+- Notes live in `~/.basecamp/notes.json` (`notes_http.go`); `useNotes()` in `web/src/notes.js`
+  moves a browser's old localStorage notes up on first load, and falls back to localStorage
+  when no server answers.
+- The dashboard is served over plain http, so `navigator.clipboard` may be missing or refuse;
+  copy buttons need the textarea fallback (see `PlaybookActions` in `components.jsx`).
 - The Claude app's browser pane blocks scripts from the tailnet host; preview at
   http://localhost:3050 instead.
 - Status values the UI understands: `active`, `current`, `running` (good), `outdated`, `stale`
@@ -47,13 +50,18 @@ Mac (paths, hostnames, keys, dotfile contents).
 
 ## Open work (as of 2026-11-24)
 
-1. **Privacy (Mario's call).** `web/public/scan.json` (a March 2026 scan of this Mac) and
-   `cli/basecamp` (binary with `/Users/Mario/...` build paths) have been public since the first
-   commit; `web/node_modules` and `.DS_Store` are tracked too. Proposed: untrack them and add a
-   `.gitignore`. Rewriting history or making the repo private is Mario's decision. The main
-   checkout has uncommitted changes to both files; untracking upstream will make `git pull` there
-   complain until those local copies are moved aside.
-2. **Pass 1 fixes:** waiting on Mario's picks from the 2026-11-24 review (bug list in the PR).
-3. **`basecamp diff`** is in the README as "coming soon" but does not exist.
-4. Parallel work on other branches: a Jobs view (`basecamp-jobs`) and config tracking
-   (`basecamp-dotfiles`). They build on `basecamp serve`; deploy with the install script.
+1. **Public history (Mario's call).** Pass 1 untracked `web/public/scan.json`, `cli/basecamp`,
+   `web/node_modules` and `.DS_Store`, but the March 2026 scan and the binary are still in git
+   history on the public repo (no secrets: hostname, software inventory, launch agent names,
+   SSH key age, `/Users/Mario` build paths). Rewriting history or making the repo private is
+   Mario's decision. The main checkout has local edits to both files: move them aside before
+   `git pull` there, since upstream now deletes them.
+2. **`basecamp diff`** is not built (the old README called it "coming soon").
+3. **Parallel branches:** a Jobs view (`basecamp-jobs`) and config tracking (`basecamp-dotfiles`)
+   build on `basecamp serve`. Each registers its routes with one line in `runServe`.
+4. **Cleanup the scan points at** (Mario's machine, not code): Node 15/16/18/20/23 under nvm are
+   end-of-life, 22 brew packages outdated, mongodb-community installed but not running, a leftover
+   "VPN by Google One" launch agent, Remote WSL and three Docker extensions in VS Code, a
+   5.4-year-old SSH key.
+5. Not verified in a browser: the playbook's "Download .sh" button (the Claude app's pane blocks
+   downloads). Copy, notes, Run Scan and the version compare were checked on 2026-11-24.

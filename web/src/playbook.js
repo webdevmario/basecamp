@@ -1,7 +1,13 @@
+// "name@version" to {name, version}; scoped names keep their leading "@" ("@scope/pkg@1.2.0").
+export function splitPkg(spec) {
+  const at = spec.lastIndexOf('@');
+  return at > 0 ? { name: spec.slice(0, at), version: spec.slice(at + 1) } : { name: spec, version: '' };
+}
+
 export function generatePlaybook(data) {
   const lines = [
     '#!/bin/bash',
-    `# basecamp playbook — ${data.meta?.hostname || 'unknown'}`,
+    `# basecamp playbook for ${data.meta?.hostname || 'unknown'}`,
     `# Generated ${new Date(data.meta?.lastScan || Date.now()).toLocaleDateString()}`,
     '',
     '# === Homebrew ===',
@@ -69,7 +75,7 @@ export function generatePlaybook(data) {
           lines.push(`nvm install ${v.version}`);
           if (v.globals?.length) {
             lines.push(`nvm use ${v.version}`);
-            const pkgNames = v.globals.map(g => g.split('@')[0]);
+            const pkgNames = v.globals.map(g => splitPkg(g).name);
             lines.push(`npm install -g ${pkgNames.join(' ')}`);
           }
         });
@@ -88,7 +94,7 @@ export function generatePlaybook(data) {
           lines.push(`pyenv install ${v.version}`);
           if (v.globals?.length) {
             lines.push(`pyenv shell ${v.version}`);
-            const pkgNames = v.globals.map(g => g.split('@')[0]);
+            const pkgNames = v.globals.map(g => splitPkg(g).name);
             lines.push(`pip install ${pkgNames.join(' ')}`);
           }
         });

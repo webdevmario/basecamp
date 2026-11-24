@@ -112,13 +112,13 @@ func scanGlobalPackages() Category {
 
 func checkDeprecatedNPM(name string) string {
 	deprecated := map[string]string{
-		"create-react-app": "Deprecated upstream — use Vite or Next.js",
+		"create-react-app": "Deprecated upstream; use Vite or Next.js",
 		"nodemon":          "tsx --watch or node --watch provides equivalent functionality",
-		"tslint":           "Deprecated — use ESLint with typescript-eslint",
-		"bower":            "Deprecated — use npm/yarn/pnpm directly",
+		"tslint":           "Deprecated; use ESLint with typescript-eslint",
+		"bower":            "Deprecated; use npm/yarn/pnpm directly",
 		"gulp":             "Consider modern alternatives like npm scripts or Vite",
-		"grunt":            "Deprecated — consider npm scripts or modern bundlers",
-		"request":          "Deprecated — use node-fetch, undici, or axios",
+		"grunt":            "Deprecated; consider npm scripts or modern bundlers",
+		"request":          "Deprecated; use node-fetch, undici, or axios",
 	}
 	if note, ok := deprecated[name]; ok {
 		return note
