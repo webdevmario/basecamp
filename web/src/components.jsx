@@ -18,7 +18,8 @@ export function ScoreRing({ score, size = 52 }) {
   const off = c - (score / 100) * c;
   const col = score >= 90 ? 'var(--green)' : score >= 70 ? 'var(--yellow)' : 'var(--red)';
   return (
-    <svg width={size} height={size} style={{ transform: 'rotate(-90deg)', flexShrink: 0 }}>
+    // Drawn in a size-by-size box, shown a quarter bigger and in rem so it grows with the text.
+    <svg viewBox={`0 0 ${size} ${size}`} width={`${(size * 1.25) / 16}rem`} height={`${(size * 1.25) / 16}rem`} style={{ transform: 'rotate(-90deg)', flexShrink: 0 }}>
       <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth={4.5} />
       <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={col} strokeWidth={4.5}
         strokeDasharray={c} strokeDashoffset={off} strokeLinecap="round"
@@ -73,14 +74,11 @@ export function PlaybookActions({ script, hostname }) {
     a.click();
     URL.revokeObjectURL(url);
   };
-  const btn = {
-    padding: '0.5rem 1rem', fontSize: 'var(--text-sm)', fontWeight: 600, cursor: 'pointer', borderRadius: '0.5rem',
-    border: '1px solid var(--border2)', background: 'var(--card2)', color: 'var(--fg)', fontFamily: 'inherit',
-  };
   return (
     <div style={{ display: 'flex', gap: '0.625rem', marginBottom: '1rem' }}>
-      <button style={btn} onClick={copy}>{copied ? 'Copied' : 'Copy'}</button>
-      <button style={btn} onClick={download}>Download .sh</button>
+      {/* Copy reserves the width of "Copied" so the row doesn't shift */}
+      <button className="btn" onClick={copy} style={{ minWidth: '6.5rem' }}>{copied ? 'Copied' : 'Copy'}</button>
+      <button className="btn" onClick={download}>Download .sh</button>
     </div>
   );
 }

@@ -93,26 +93,24 @@ function FileRow({ f, open, onToggle, last }) {
     <div style={{ borderBottom: last ? 'none' : '1px solid var(--border)' }}>
       <div
         onClick={canOpen ? onToggle : undefined}
-        style={{
-          display: 'grid', gridTemplateColumns: 'minmax(13rem, 1.2fr) 7rem minmax(14rem, 2fr) 1.5rem',
-          gap: '0.75rem', padding: '0.75rem 1.25rem', alignItems: 'center', cursor: canOpen ? 'pointer' : 'default',
-        }}
+        className="file-grid"
+        style={{ padding: '0.75rem 1.25rem', minHeight: 'var(--tap)', cursor: canOpen ? 'pointer' : 'default' }}
         onMouseEnter={e => { e.currentTarget.style.background = 'var(--accent-hover)'; }}
         onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
       >
-        <div style={{ overflow: 'hidden' }}>
+        <div className="a-name" style={{ overflow: 'hidden' }}>
           <div style={{ fontFamily: mono, fontSize: 'var(--text-base)', fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{f.label}</div>
           <div style={{ fontSize: 'var(--text-sm)', color: 'var(--fg3)', marginTop: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
             {f.generated ? 'generated' : f.source} {'→'} {f.repoPath}
           </div>
         </div>
-        <div style={{ display: 'flex', justifyContent: 'center' }}><Badge status={f.status} /></div>
-        <div style={{ fontSize: 'var(--text-sm)', color: 'var(--fg2)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+        <div className="a-status" style={{ display: 'flex', justifyContent: 'center' }}><Badge status={f.status} /></div>
+        <div className="a-info" style={{ fontSize: 'var(--text-sm)', color: 'var(--fg2)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
           {f.status === 'blocked'
             ? f.secrets.map(s => `line ${s.line}: ${s.rule}`).join(', ')
             : f.error || STATUS_HELP[f.status]}
         </div>
-        <div style={{ color: 'var(--fg3)', fontSize: 'var(--text-sm)' }}>{canOpen ? (open ? '▾' : '▸') : ''}</div>
+        <div className="a-note" style={{ color: 'var(--fg3)', fontSize: 'var(--text-sm)', textAlign: 'center' }}>{canOpen ? (open ? '▾' : '▸') : ''}</div>
       </div>
       {open && f.status === 'blocked' && (
         <div style={{ margin: '0 1.25rem 0.75rem', fontSize: 'var(--text-sm)', color: 'var(--fg2)', lineHeight: 1.6 }}>
@@ -164,8 +162,8 @@ export default function ConfigsView() {
 
   if (error && !status) {
     return (
-      <div className="slide-in" style={{ padding: '2.5rem', maxWidth: '50rem' }}>
-        <h2 style={{ fontSize: 'var(--text-xl)', fontWeight: 700, marginBottom: '0.625rem' }}>🗂 Configs</h2>
+      <div className="slide-in page" style={{ maxWidth: '50rem', marginLeft: 0 }}>
+        <h2 style={{ fontSize: 'var(--text-2xl)', fontWeight: 700, marginBottom: '0.625rem' }}>🗂 Configs</h2>
         <p style={{ fontSize: 'var(--text-base)', color: 'var(--fg3)', lineHeight: 1.6, marginBottom: '1.25rem' }}>
           The Configs tab talks to <code style={{ fontFamily: mono }}>basecamp serve</code>, which is not reachable ({error}).
           The same status is on the command line:
@@ -180,11 +178,11 @@ basecamp dotfiles save --push`}
   }
 
   return (
-    <div className="slide-in">
-      <div style={{ padding: '2rem 2.5rem 0' }}>
-        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '1.5rem', gap: '1.25rem' }}>
+    <div className="slide-in page">
+      <div>
+        <div className="page-head wrap">
           <div>
-            <h2 style={{ fontSize: 'var(--text-xl)', fontWeight: 700, letterSpacing: '-0.02em', marginBottom: '0.375rem' }}>🗂 Configs</h2>
+            <h2 style={{ fontSize: 'var(--text-2xl)', fontWeight: 700, letterSpacing: '-0.02em', marginBottom: '0.375rem' }}>🗂 Configs</h2>
             <p style={{ fontSize: 'var(--text-base)', color: 'var(--fg3)' }}>
               Saved to {status?.remote ? <span style={{ fontFamily: mono }}>{status.remote.replace(/^.*github\.com[:/]/, '').replace(/\.git$/, '')}</span> : 'a local repo'}
               {' · '}last save {timeAgo(status?.lastSave)}
@@ -192,9 +190,10 @@ basecamp dotfiles save --push`}
             </p>
           </div>
           <div style={{ display: 'flex', gap: '0.625rem' }}>
-            <button onClick={load} disabled={loading} style={btn(false)}>{loading ? 'Checking…' : 'Refresh'}</button>
-            <button onClick={save} disabled={saving || !status?.initialized || (pending === 0 && !status?.unpushed)} style={btn(true, saving || pending === 0 && !status?.unpushed)}>
-              {saving ? 'Saving…' : pending > 0 ? `Save ${pending}${status?.remote ? ' and push' : ''}` : status?.unpushed ? 'Push' : 'Nothing to save'}
+            {/* Refresh keeps its label while checking (dimmed), so the buttons don't shift */}
+            <button className="btn" onClick={load} disabled={loading} aria-busy={loading}>Refresh</button>
+            <button className="btn btn-primary" onClick={save} disabled={saving || !status?.initialized || (pending === 0 && !status?.unpushed)} aria-busy={saving}>
+              {pending > 0 ? `Save ${pending}${status?.remote ? ' and push' : ''}` : status?.unpushed ? 'Push' : 'Nothing to save'}
             </button>
           </div>
         </div>
@@ -213,14 +212,14 @@ basecamp dotfiles save --push`}
           {['synced', 'changed', 'new', 'blocked', 'missing'].map(k => (
             <span key={k}><span style={{ color: STATUS[k].color }}>●</span> <strong>{counts[k] || 0}</strong> <span style={{ color: 'var(--fg3)' }}>{STATUS[k].label.toLowerCase()}</span></span>
           ))}
-          <label style={{ marginLeft: 'auto', color: 'var(--fg3)', display: 'flex', gap: '0.5rem', alignItems: 'center', cursor: 'pointer' }}>
-            <input type="checkbox" checked={onlyPending} onChange={e => setOnlyPending(e.target.checked)} />
+          <label style={{ marginLeft: 'auto', color: 'var(--fg3)', display: 'flex', gap: '0.5rem', alignItems: 'center', cursor: 'pointer', minHeight: 'var(--tap)' }}>
+            <input type="checkbox" style={{ width: '1.125rem', height: '1.125rem', accentColor: 'var(--accent)' }} checked={onlyPending} onChange={e => setOnlyPending(e.target.checked)} />
             Hide in-sync files
           </label>
         </div>
       </div>
 
-      <div style={{ padding: '0 2.5rem 3.75rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
         {groups.length === 0 && (
           <div style={{ padding: '2.25rem', textAlign: 'center', color: 'var(--fg3)', fontSize: 'var(--text-base)', background: 'var(--card)', borderRadius: '0.75rem', border: '1px solid var(--border)' }}>
             {!status ? 'Checking your configs…' : onlyPending ? 'Everything matches the last save.' : 'No configs found.'}
@@ -266,12 +265,3 @@ function Notice({ color, children }) {
   );
 }
 
-function btn(primary, dim) {
-  return {
-    padding: '0.625rem 1rem', borderRadius: '0.5rem', fontSize: 'var(--text-sm)', fontWeight: 600, fontFamily: 'inherit',
-    cursor: dim ? 'default' : 'pointer', whiteSpace: 'nowrap',
-    border: primary ? 'none' : '1px solid var(--border2)',
-    background: primary ? 'var(--accent)' : 'var(--card2)',
-    color: primary ? '#000' : 'var(--fg)', opacity: dim ? 0.5 : 1,
-  };
-}

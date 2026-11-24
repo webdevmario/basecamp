@@ -57,6 +57,28 @@ Mac (paths, hostnames, keys, dotfile contents).
 - Status values the UI understands: `active`, `current`, `running` (good), `outdated`, `stale`
   (count as issues and lower the score).
 
+## UI conventions (2026-11-24, matched to borrowd, Stacks, Financial Insider, Papers)
+
+- Size everything in rem, never px, so it grows with the root: 16px on phones and laptops, 17px
+  from 1280px wide, 18px from 1600px (`styles.css`, the same rule as borrowd). Only 1-2px hairlines
+  stay px.
+- Text uses the type scale in `styles.css`: `fontSize: 'var(--text-sm)'` (xs 12, sm 14, base 16,
+  lg 18, xl 20, 2xl 24, Tailwind's steps). Body and nav are `base`, secondary lines `sm`,
+  uppercase labels and badges `xs`, page titles `2xl`. Nothing smaller than `xs`.
+- Styles stay inline (no Tailwind here); anything that needs a breakpoint is a class in
+  `styles.css`: `.shell/.sidebar/.main/.topbar` (phones get a top bar and the sidebar as a drawer),
+  `.page` (padding, 112rem cap), `.page-head`, `.btn`/`.btn-primary`/`.btn-quiet`, `.icon-btn`,
+  `.nav-btn`, `.modal-scrim`/`.modal` (bottom sheet on phones), and the row grids `.item-grid`,
+  `.file-grid`, `.job-grid` with `a-*` areas that restack under 768px. Inline styles win over
+  classes, so don't set a class's property inline too.
+- Phones (under 768px): tap targets at least `--tap` (44px), table headers hidden, rows stack.
+- Colors: Financial Insider and Papers neutrals (`--bg #0f1117`, `--card #181a24`,
+  `--border #2a2d3e`) with basecamp's indigo accent. Dark only.
+- Nothing moves after a tap (borrowd's rule): busy buttons keep their label, dimmed with
+  `aria-busy`; a label that changes reserves the longer width (Copy/Copied).
+- Check a UI change at phone (375), laptop (1440) and wide (2560) widths. Headless Chrome won't
+  go under 500px wide, so use the browser pane's mobile size for phones.
+
 ## Open work (as of 2026-11-24, evening)
 
 Everything from the first passes is merged and deployed (PRs #1 to #4): `basecamp serve` on :3050,
@@ -72,6 +94,12 @@ Springboard's plist); on 2026-11-24 it reported all 23 jobs fine.
    Optional; the nightly backups would benefit most.
 4. Not verified in a browser: the playbook's "Download .sh" button (the Claude app's pane blocks
    downloads).
+5. **Global Packages is empty** in the hourly scan (0 items on 2026-11-24, `globals` category), so
+   the version compare shows no packages for the current Node. Likely the launchd environment
+   (npm/pip/cargo not on PATH for `com.basecamp-scan`); compare with a scan run by hand.
+
+UI pass (2026-11-24, branch `claude/ui-pass-b919b3`): bigger rem-based sizing, phone layout, see
+UI conventions above.
 
 Decided, so don't redo: no Homebrew section (Mario, 2026-11-24: the Homebrew app,
 `/Applications/Homebrew.app`, manages and updates packages). The Brewfile stays in the dotfiles

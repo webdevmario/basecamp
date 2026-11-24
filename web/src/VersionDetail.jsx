@@ -52,17 +52,12 @@ export default function VersionDetail({ item, onClose }) {
   const statusLabel = { installed: 'Installed', missing: 'Missing', extra: 'Extra', differs: 'Different' };
 
   return (
-    <div onClick={onClose} style={{
-      position: 'fixed', inset: 0, zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center',
-      background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)',
-    }}>
-      <div onClick={e => e.stopPropagation()} style={{
-        background: '#16171b', border: '1px solid #2a2a32', borderRadius: '1rem',
-        width: '41rem', maxWidth: '92vw', maxHeight: '85vh', display: 'flex', flexDirection: 'column',
-        boxShadow: '0 24px 80px rgba(0,0,0,0.5)', overflow: 'hidden',
+    <div className="modal-scrim" onClick={onClose}>
+      <div className="modal" onClick={e => e.stopPropagation()} style={{
+        width: '44rem', maxHeight: '85vh', display: 'flex', flexDirection: 'column', overflow: 'hidden',
       }}>
         {/* Header */}
-        <div style={{ padding: '2rem 2rem 1.5rem', flexShrink: 0 }}>
+        <div style={{ padding: '1.75rem 1.75rem 1.25rem', flexShrink: 0 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
             <div>
               <div style={{ fontSize: 'var(--text-xl)', fontWeight: 700, marginBottom: '0.25rem' }}>{item.name}</div>
@@ -70,24 +65,22 @@ export default function VersionDetail({ item, onClose }) {
                 {item.versions.length} versions via {item.versionManager}
               </div>
             </div>
-            <button onClick={onClose} style={{
-              background: 'none', border: 'none', color: 'var(--fg3)', fontSize: 'var(--text-xl)', cursor: 'pointer', padding: '0 0.375rem',
-            }}>✕</button>
+            <button className="icon-btn" onClick={onClose} aria-label="Close" style={{ color: 'var(--fg3)', fontSize: 'var(--text-xl)', margin: '-0.5rem -0.5rem 0 0' }}>✕</button>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
             <span style={{ fontSize: 'var(--text-sm)', color: 'var(--fg3)', fontWeight: 500 }}>Reviewing</span>
             <select
               value={activeIdx}
               onChange={e => setActiveIdx(parseInt(e.target.value))}
               style={{
-                padding: '0.5rem 2.5rem 0.5rem 1rem', fontSize: 'var(--text-base)', fontWeight: 600,
+                minHeight: '2.75rem', maxWidth: '100%', padding: '0.5rem 2.5rem 0.5rem 1rem', fontSize: 'var(--text-base)', fontWeight: 600,
                 fontFamily: "'JetBrains Mono', monospace",
                 background: 'var(--card)', color: 'var(--fg)',
                 border: '1px solid var(--border2)', borderRadius: '0.5rem',
                 outline: 'none', cursor: 'pointer', appearance: 'none',
                 backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2371717a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`,
-                backgroundRepeat: 'no-repeat', backgroundPosition: 'right 10px center',
+                backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.75rem center',
               }}>
               {item.versions.map((v, i) => {
                 let gapCount = 0;
@@ -109,7 +102,7 @@ export default function VersionDetail({ item, onClose }) {
         </div>
 
         {/* Content */}
-        <div style={{ flex: 1, overflow: 'auto', padding: '1.25rem 2rem 2rem' }}>
+        <div style={{ flex: 1, overflow: 'auto', padding: '0.5rem 1.75rem 1.75rem' }}>
           {!isCurrent && (
             <div style={{
               display: 'flex', gap: '1.25rem', fontSize: 'var(--text-sm)', marginBottom: '1rem', padding: '0.75rem 1rem',
@@ -140,7 +133,7 @@ export default function VersionDetail({ item, onClose }) {
                 background: row.status === 'missing' ? 'rgba(248,113,113,0.03)' : 'transparent',
               }}>
                 <div style={{
-                  fontFamily: "'JetBrains Mono'", fontSize: 'var(--text-sm)', fontWeight: 500,
+                  fontFamily: "'JetBrains Mono'", fontSize: 'var(--text-sm)', fontWeight: 500, minWidth: 0, overflowWrap: 'anywhere',
                   color: row.status === 'missing' ? 'var(--red)' : 'var(--fg)',
                 }}>
                   {row.name}
@@ -157,7 +150,7 @@ export default function VersionDetail({ item, onClose }) {
                       fontSize: 'var(--text-xs)', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase',
                       padding: '2px 0', borderRadius: '0.25rem', textAlign: 'center', width: '4.75rem',
                       display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                      color: statusColor[row.status], background: `${statusColor[row.status]}11`,
+                      color: statusColor[row.status], background: `color-mix(in srgb, ${statusColor[row.status]} 10%, transparent)`,
                     }}>{statusLabel[row.status]}</span>
                   )}
                 </div>

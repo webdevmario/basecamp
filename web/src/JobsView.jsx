@@ -54,7 +54,7 @@ export function JobsNavButton({ jobs, active, onClick }) {
   const red = jobs.data ? jobs.data.jobs.filter(j => j.red).length : 0;
   const warn = jobs.data ? jobs.data.jobs.filter(j => j.status === 'warning').length : 0;
   return (
-    <button onClick={onClick} onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)} style={{
+    <button className="nav-btn" onClick={onClick} onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)} style={{
       display: 'flex', alignItems: 'center', gap: '0.75rem', width: '100%',
       padding: '0.625rem 0.75rem', borderRadius: '0.5rem', border: 'none', cursor: 'pointer',
       background: active ? 'var(--accent-bg)' : hov ? 'var(--accent-hover)' : 'transparent',
@@ -185,14 +185,14 @@ function NightTimeline({ jobs }) {
 
   return (
     <div style={{ ...card, padding: '1rem 1.25rem 0.75rem', marginBottom: '1.5rem' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem 1rem', marginBottom: '0.75rem' }}>
         <span style={sectionTitle}>Last night, {fmtHM(start)} to {fmtHM(end)}</span>
         <span style={{ fontSize: 'var(--text-sm)', color: 'var(--fg3)', display: 'flex', gap: '1rem' }}>
           <span><span style={{ display: 'inline-block', width: '0.5rem', height: '0.5rem', border: '1.5px solid var(--fg3)', borderRadius: 2, marginRight: '0.375rem' }} />scheduled</span>
           <span><span style={{ display: 'inline-block', width: '1rem', height: '0.375rem', background: 'var(--green)', borderRadius: 2, marginRight: '0.375rem', verticalAlign: 'middle' }} />ran</span>
         </span>
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: '15rem 1fr', rowGap: '0.375rem', alignItems: 'center' }}>
+      <div className="timeline-grid">
         <div />
         <div style={{ position: 'relative', height: '1rem' }}>
           {ticks.map(m => (
@@ -260,25 +260,22 @@ function JobRow({ job, open, onToggle }) {
   const lastRun = job.kind === 'service' ? (job.pid ? `pid ${job.pid}` : 'not running') : (when(job.lastRun) || 'no run seen');
   return (
     <div style={{ borderBottom: '1px solid var(--border)' }}>
-      <div onClick={onToggle} style={{
-        display: 'grid', gridTemplateColumns: '5.5rem minmax(10rem, 1fr) 8rem 9rem minmax(0, 2fr) 1rem',
-        gap: '1rem', padding: '0.75rem 1.25rem', alignItems: 'center', cursor: 'pointer',
-      }}
+      <div className="job-grid" onClick={onToggle} style={{ padding: '0.75rem 1.25rem', minHeight: 'var(--tap)', cursor: 'pointer' }}
         onMouseEnter={e => (e.currentTarget.style.background = 'var(--accent-hover)')}
         onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
-        <Badge status={job.status} />
-        <div style={{ overflow: 'hidden' }}>
+        <span className="a-badge"><Badge status={job.status} /></span>
+        <div className="a-name" style={{ overflow: 'hidden' }}>
           <div style={{ fontFamily: MONO, fontSize: 'var(--text-base)', fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{job.label}</div>
         </div>
-        <div style={{ fontSize: 'var(--text-sm)', color: 'var(--fg2)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{job.schedule}</div>
-        <div style={{ fontSize: 'var(--text-sm)', color: 'var(--fg2)', whiteSpace: 'nowrap' }} title={job.lastRunSource ? `from ${job.lastRunSource}` : ''}>{lastRun}</div>
-        <div style={{ fontSize: 'var(--text-sm)', color: RED.has(job.status) ? c.color : 'var(--fg2)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+        <div className="a-sched" style={{ fontSize: 'var(--text-sm)', color: 'var(--fg2)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{job.schedule}</div>
+        <div className="a-last" style={{ fontSize: 'var(--text-sm)', color: 'var(--fg2)', whiteSpace: 'nowrap' }} title={job.lastRunSource ? `from ${job.lastRunSource}` : ''}>{lastRun}</div>
+        <div className="a-result" style={{ fontSize: 'var(--text-sm)', color: RED.has(job.status) ? c.color : 'var(--fg2)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
           {resultLine(job)}
         </div>
-        <span style={{ color: 'var(--fg4)', fontSize: 'var(--text-sm)', transform: open ? 'rotate(90deg)' : 'none', transition: 'transform 0.12s' }}>▸</span>
+        <span className="a-chev" style={{ color: 'var(--fg4)', fontSize: 'var(--text-sm)', transform: open ? 'rotate(90deg)' : 'none', transition: 'transform 0.12s' }}>▸</span>
       </div>
       {!open && job.snapshots?.length > 0 && (
-        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', padding: '0 1.25rem 0.75rem 8rem', marginTop: -2 }}>
+        <div className="job-indent" style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', paddingRight: '1.25rem', paddingBottom: '0.75rem', marginTop: -2 }}>
           {job.snapshots.map(s => <SnapshotChips key={s.name} snap={s} compact />)}
         </div>
       )}
@@ -312,7 +309,7 @@ function JobDetail({ job }) {
   ) : null;
   const exit = job.lastExit === undefined || job.lastExit === null ? 'never exited since load' : String(job.lastExit);
   return (
-    <div className="slide-in" style={{ padding: '0.375rem 1.25rem 1.25rem 8rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+    <div className="slide-in job-indent" style={{ paddingTop: '0.375rem', paddingRight: '1.25rem', paddingBottom: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1rem', minWidth: 0 }}>
       {(job.reasons?.length > 0 || job.notes?.length > 0) && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.375rem' }}>
           {job.reasons.map((r, i) => <div key={`r${i}`} style={{ fontSize: 'var(--text-base)', color: statusCfg(job.status).color }}>• {r}</div>)}
@@ -331,12 +328,12 @@ function JobDetail({ job }) {
       {job.snapshots?.length > 0 && (
         <div>
           <div style={{ ...sectionTitle, marginBottom: '0.5rem' }}>Backups</div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'auto auto 1fr', gap: '0.375rem 1rem', fontSize: 'var(--text-sm)', alignItems: 'center' }}>
+          <div className="backups-grid" style={{ fontSize: 'var(--text-sm)' }}>
             {job.snapshots.map(s => {
               const off = s.offsite && OFFSITE[s.offsite];
               return (
                 <React.Fragment key={s.name}>
-                  <span style={{ fontFamily: MONO, color: 'var(--fg2)' }}>{s.file || s.name}</span>
+                  <span style={{ fontFamily: MONO, color: 'var(--fg2)', overflowWrap: 'anywhere' }}>{s.file || s.name}</span>
                   <Chip tone={s.stale ? 'bad' : 'good'}>{s.error ? s.error : `${when(s.at)}${s.source === 'log' ? ' (from log)' : ''}`}</Chip>
                   <span>{off ? <Chip tone={off[0]}>{off[1](s)}</Chip> : null}</span>
                 </React.Fragment>
@@ -354,9 +351,9 @@ function JobDetail({ job }) {
       </div>
       {job.log && (
         <div>
-          <div style={{ ...sectionTitle, marginBottom: '0.5rem', display: 'flex', justifyContent: 'space-between', gap: '0.75rem' }}>
+          <div style={{ ...sectionTitle, marginBottom: '0.5rem', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.25rem 0.75rem' }}>
             <span>Log tail</span>
-            <span style={{ fontFamily: MONO, textTransform: 'none', letterSpacing: 0, fontWeight: 400 }}>
+            <span style={{ fontFamily: MONO, textTransform: 'none', letterSpacing: 0, fontWeight: 400, overflowWrap: 'anywhere' }}>
               {job.log.path}{job.log.modTime ? ` · written ${ago(job.log.modTime)}` : ''}
             </span>
           </div>
@@ -394,8 +391,8 @@ export default function JobsView({ jobs }) {
 
   if (!data) {
     return (
-      <div style={{ padding: '2.5rem', maxWidth: '50rem' }}>
-        <h2 style={{ fontSize: 'var(--text-xl)', fontWeight: 700, marginBottom: '0.625rem' }}>Jobs</h2>
+      <div className="page" style={{ maxWidth: '50rem', marginLeft: 0 }}>
+        <h2 style={{ fontSize: 'var(--text-2xl)', fontWeight: 700, marginBottom: '0.625rem' }}>Jobs</h2>
         <p style={{ fontSize: 'var(--text-base)', color: 'var(--fg3)', lineHeight: 1.6, marginBottom: '1rem' }}>
           {loading ? 'Loading jobs…' : `${error}. Run the check once, or install the 15-minute job with scripts/install-service.sh:`}
         </p>
@@ -417,10 +414,10 @@ export default function JobsView({ jobs }) {
   const otherGaps = gaps.filter(f => !/wiped on reboot/.test(f.text));
 
   return (
-    <div className="slide-in" style={{ padding: '2rem 2.5rem 3.75rem' }}>
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '1.5rem', gap: '1.25rem' }}>
+    <div className="slide-in page">
+      <div className="page-head wrap">
         <div>
-          <h2 style={{ fontSize: 'var(--text-xl)', fontWeight: 700, letterSpacing: '-0.02em', display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.375rem' }}>
+          <h2 style={{ fontSize: 'var(--text-2xl)', fontWeight: 700, letterSpacing: '-0.02em', display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.375rem' }}>
             <span>⏱</span>Jobs
           </h2>
           <p style={{ fontSize: 'var(--text-base)', color: 'var(--fg3)' }}>
@@ -428,10 +425,8 @@ export default function JobsView({ jobs }) {
             {stale && <span style={{ color: 'var(--red)' }}> (is com.basecamp-jobs running?)</span>}
           </p>
         </div>
-        <button onClick={reload} style={{
-          padding: '0.5rem 1rem', fontSize: 'var(--text-sm)', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
-          background: 'var(--card2)', color: 'var(--fg)', border: '1px solid var(--border2)', borderRadius: '0.5rem',
-        }}>{loading ? '⟳ Loading…' : '↻ Reload'}</button>
+        {/* Keeps its label while loading (dimmed), so the header doesn't shift */}
+        <button className="btn" onClick={reload} disabled={loading} aria-busy={loading}>↻ Reload</button>
       </div>
 
       <div style={{ ...card, display: 'flex', gap: '1.5rem', padding: '1rem 1.25rem', marginBottom: '1rem', fontSize: 'var(--text-sm)', alignItems: 'center', flexWrap: 'wrap' }}>
@@ -467,9 +462,8 @@ export default function JobsView({ jobs }) {
       <NightTimeline jobs={scheduled} />
 
       <div style={{ ...card, overflow: 'hidden', marginBottom: '1.5rem' }}>
-        <div style={{
-          display: 'grid', gridTemplateColumns: '5.5rem minmax(10rem, 1fr) 8rem 9rem minmax(0, 2fr) 1rem',
-          gap: '1rem', padding: '0.625rem 1.25rem', ...sectionTitle, color: 'var(--fg4)', borderBottom: '1px solid var(--border)',
+        <div className="job-grid grid-head" style={{
+          padding: '0.625rem 1.25rem', ...sectionTitle, color: 'var(--fg4)', borderBottom: '1px solid var(--border)',
         }}>
           <span>Status</span><span>Job</span><span>Schedule</span><span>Last run</span><span>Result</span><span />
         </div>
@@ -488,13 +482,13 @@ export default function JobsView({ jobs }) {
       {data.thirdParty?.length > 0 && (
         <div style={{ marginBottom: '1.5rem' }}>
           <button onClick={() => setShowThirdParty(v => !v)} style={{
-            ...sectionTitle, background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontFamily: 'inherit',
+            ...sectionTitle, background: 'none', border: 'none', cursor: 'pointer', padding: 0, minHeight: 'var(--tap)',
           }}>{showThirdParty ? '▾' : '▸'} Third-party agents ({data.thirdParty.length})</button>
           {showThirdParty && (
             <div style={{ ...card, padding: '0.625rem 1.25rem', marginTop: '0.625rem' }}>
               {data.thirdParty.map(t => (
                 <div key={t.label} style={{ display: 'flex', gap: '1rem', fontSize: 'var(--text-sm)', padding: '0.375rem 0', color: 'var(--fg2)' }}>
-                  <span style={{ fontFamily: MONO, flex: 1 }}>{t.label}</span>
+                  <span style={{ fontFamily: MONO, flex: 1, minWidth: 0, overflowWrap: 'anywhere' }}>{t.label}</span>
                   <span style={{ color: 'var(--fg3)' }}>{t.kind}</span>
                   <span style={{ color: t.loaded ? 'var(--green)' : 'var(--fg4)', width: '5.5rem' }}>{t.loaded ? 'loaded' : 'not loaded'}</span>
                 </div>

@@ -27,6 +27,7 @@ export default function App() {
   const [versionItem, setVersionItem] = useState(null);
   const [notes, setNotes] = useNotes();
   const [showJobs, setShowJobs] = useState(() => window.location.hash === '#jobs');
+  const [navOpen, setNavOpen] = useState(false); // the sidebar drawer on phones
   const jobs = useJobs();
   useEffect(() => {
     const onHash = () => setShowJobs(window.location.hash === '#jobs');
@@ -102,12 +103,19 @@ export default function App() {
   }
 
   return (
-    <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
-      {/* Sidebar */}
-      <div style={{
-        width: '18rem', minWidth: '18rem', background: 'var(--card)',
-        borderRight: '1px solid var(--border)', display: 'flex', flexDirection: 'column',
-      }}>
+    <div className="shell">
+      {/* Phones: a top bar with the menu button; the sidebar opens over the page as a drawer */}
+      <div className="topbar">
+        <button className="icon-btn" onClick={() => setNavOpen(true)} aria-label="Open menu" style={{ color: 'var(--fg)', fontSize: 'var(--text-xl)' }}>☰</button>
+        <span style={{ flex: 1, fontSize: 'var(--text-lg)', fontWeight: 700, letterSpacing: '-0.02em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          {showJobs ? 'Jobs' : showPlaybook ? 'Setup Playbook' : activeCat === 'configs' ? 'Configs' : cat?.label || 'basecamp'}
+        </span>
+        <ScoreRing score={gHealth} size={32} />
+      </div>
+      <div className="scrim" data-open={navOpen || undefined} onClick={() => setNavOpen(false)} />
+
+      {/* Sidebar (any button in it closes the phone drawer) */}
+      <div className="sidebar" data-open={navOpen || undefined} onClick={e => { if (e.target.closest('button')) setNavOpen(false); }}>
         <div style={{ padding: '1.75rem 1.5rem 1.5rem', borderBottom: '1px solid var(--border)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
             <div style={{
@@ -141,7 +149,7 @@ export default function App() {
             const isHov = hoveredNav === c.id;
             const issues = h ? h.stale + h.outdated : 0;
             return (
-              <button key={c.id}
+              <button key={c.id} className="nav-btn"
                 onMouseEnter={() => setHoveredNav(c.id)}
                 onMouseLeave={() => setHoveredNav(null)}
                 onClick={() => { setActiveCat(c.id); setShowPlaybook(false); setShowJobs(false); setFilterIssues(false); history.replaceState(null, '', ' '); }}
@@ -166,7 +174,7 @@ export default function App() {
               </button>
             );
           })}
-          <button onClick={() => { setActiveCat('configs'); setShowPlaybook(false); setShowJobs(false); history.replaceState(null, '', ' '); }} style={{
+          <button className="nav-btn" onClick={() => { setActiveCat('configs'); setShowPlaybook(false); setShowJobs(false); history.replaceState(null, '', ' '); }} style={{
             display: 'flex', alignItems: 'center', gap: '0.75rem', width: '100%', padding: '0.625rem 0.75rem', borderRadius: '0.5rem',
             border: 'none', cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit', fontSize: 'var(--text-base)', marginTop: '0.5rem',
             background: activeCat === 'configs' && !showPlaybook && !showJobs ? 'var(--accent-bg)' : 'transparent',
@@ -182,29 +190,18 @@ export default function App() {
           <div style={{ fontSize: 'var(--text-xs)', color: 'var(--fg4)', textAlign: 'center', marginBottom: 2 }}>
             Last scan: {new Date(data.meta.lastScan).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
           </div>
-          <button onClick={runScan} disabled={scanning} style={{
-            width: '100%', padding: '0.75rem 0', borderRadius: '0.5rem', border: '1px solid var(--border2)',
-            background: scanning ? 'var(--accent-bg)' : 'var(--card2)',
-            color: scanning ? 'var(--accent)' : 'var(--fg)',
-            fontSize: 'var(--text-sm)', fontWeight: 600, cursor: scanning ? 'default' : 'pointer',
-            fontFamily: 'inherit', transition: 'all 0.15s', opacity: scanning ? 0.8 : 1,
-          }}>
-            {scanning ? '⟳ Scanning…' : '↻ Run Scan'}
+          {/* Keeps its label while scanning (dimmed), so nothing in the sidebar moves */}
+          <button className="btn" onClick={runScan} disabled={scanning} aria-busy={scanning} style={{ width: '100%' }}>
+            ↻ Run Scan
           </button>
-          <button onClick={() => { setShowPlaybook(!showPlaybook); setShowJobs(false); }} style={{
-            width: '100%', padding: '0.75rem 0', borderRadius: '0.5rem',
-            border: showPlaybook ? 'none' : '1px solid var(--border2)',
-            background: showPlaybook ? 'var(--accent)' : 'transparent',
-            color: showPlaybook ? '#000' : 'var(--fg3)',
-            fontSize: 'var(--text-sm)', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.15s',
-          }}>
+          <button className={showPlaybook ? 'btn btn-primary' : 'btn btn-quiet'} onClick={() => { setShowPlaybook(!showPlaybook); setShowJobs(false); }} style={{ width: '100%' }}>
             {showPlaybook ? '✕ Close Playbook' : 'Export Playbook'}
           </button>
         </div>
       </div>
 
       {/* Content */}
-      <div style={{ flex: 1, overflow: 'auto' }}>
+      <div className="main">
         {showJobs ? (
           <JobsView jobs={jobs} />
         ) : error && !data.categories.length ? (
@@ -228,8 +225,8 @@ go build -o basecamp .
             </div>
           </div>
         ) : showPlaybook ? (
-          <div className="slide-in" style={{ padding: '2.5rem', maxWidth: '61rem' }}>
-            <h2 style={{ fontSize: 'var(--text-xl)', fontWeight: 700, marginBottom: '0.375rem' }}>Setup Playbook</h2>
+          <div className="slide-in page" style={{ maxWidth: '64rem', marginLeft: 0 }}>
+            <h2 style={{ fontSize: 'var(--text-2xl)', fontWeight: 700, letterSpacing: '-0.02em', marginBottom: '0.375rem' }}>Setup Playbook</h2>
             <p style={{ fontSize: 'var(--text-base)', color: 'var(--fg3)', marginBottom: '1rem' }}>Generated from inventory · stale items excluded</p>
             <PlaybookActions script={playbook} hostname={data.meta.hostname} />
             <pre style={{
@@ -241,11 +238,11 @@ go build -o basecamp .
         ) : activeCat === 'configs' ? (
           <ConfigsView />
         ) : cat ? (
-          <div className="slide-in" key={activeCat}>
-            <div style={{ padding: '2rem 2.5rem 0' }}>
-              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
+          <div className="slide-in page" key={activeCat}>
+            <div>
+              <div className="page-head">
                 <div>
-                  <h2 style={{ fontSize: 'var(--text-xl)', fontWeight: 700, letterSpacing: '-0.02em', display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.375rem' }}>
+                  <h2 style={{ fontSize: 'var(--text-2xl)', fontWeight: 700, letterSpacing: '-0.02em', display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.375rem' }}>
                     <span>{cat.icon}</span>{cat.label}
                   </h2>
                   <p style={{ fontSize: 'var(--text-base)', color: 'var(--fg3)' }}>{cat.desc}</p>
@@ -257,7 +254,7 @@ go build -o basecamp .
               <div style={{
                 display: 'flex', gap: '1.5rem', padding: '1rem 1.25rem',
                 background: 'var(--card)', borderRadius: '0.75rem', border: '1px solid var(--border)', marginBottom: '0.625rem',
-                fontSize: 'var(--text-sm)', alignItems: 'center',
+                fontSize: 'var(--text-sm)', alignItems: 'center', flexWrap: 'wrap', rowGap: '0.375rem',
               }}>
                 <span><span style={{ color: 'var(--fg3)' }}>Total </span><strong style={{ fontFamily: "'JetBrains Mono'" }}>{catHealth.total}</strong></span>
                 <span style={{ color: 'var(--border)' }}>|</span>
@@ -289,12 +286,10 @@ go build -o basecamp .
               {/* Filter */}
               {(catHealth.stale + catHealth.outdated) > 0 && (
                 <div style={{ marginBottom: '1rem' }}>
-                  <button onClick={() => setFilterIssues(!filterIssues)} style={{
-                    padding: '0.5rem 1rem', fontSize: 'var(--text-sm)', fontWeight: 600, cursor: 'pointer',
+                  <button className="btn" onClick={() => setFilterIssues(!filterIssues)} style={{
                     background: filterIssues ? 'rgba(248,113,113,0.08)' : 'var(--card)',
                     color: filterIssues ? 'var(--red)' : 'var(--fg3)',
                     border: `1px solid ${filterIssues ? 'rgba(248,113,113,0.2)' : 'var(--border)'}`,
-                    borderRadius: '0.5rem', fontFamily: 'inherit', transition: 'all 0.15s',
                   }}>
                     {filterIssues ? '✕ Showing issues only' : `⚠ ${catHealth.stale + catHealth.outdated} items need attention`}
                   </button>
@@ -303,11 +298,10 @@ go build -o basecamp .
             </div>
 
             {/* Item rows */}
-            <div style={{ padding: '0 2.5rem 3.75rem' }}>
+            <div>
               <div style={{ background: 'var(--card)', borderRadius: '0.75rem', border: '1px solid var(--border)', overflow: 'hidden' }}>
-                <div style={{
-                  display: 'grid', gridTemplateColumns: 'minmax(10rem, 1fr) 5.75rem minmax(14rem, 2fr) 2.75rem',
-                  gap: '0.75rem', padding: '0.625rem 1.25rem', fontSize: 'var(--text-xs)', fontWeight: 700,
+                <div className="item-grid grid-head" style={{
+                  padding: '0.625rem 1.25rem', fontSize: 'var(--text-xs)', fontWeight: 700,
                   textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--fg4)',
                   borderBottom: '1px solid var(--border)',
                 }}>
@@ -326,16 +320,15 @@ go build -o basecamp .
                   const userNote = getNote(notes, activeCat, item.name);
                   const hasUserNote = userNote.trim().length > 0;
                   return (
-                    <div key={i} style={{
-                      display: 'grid', gridTemplateColumns: 'minmax(10rem, 1fr) 5.75rem minmax(14rem, 2fr) 2.75rem',
-                      gap: '0.75rem', padding: '0.75rem 1.25rem', alignItems: 'center',
+                    <div key={i} className="item-grid" style={{
+                      padding: '0.75rem 1.25rem',
                       borderBottom: i < filteredItems.length - 1 ? '1px solid var(--border)' : 'none',
                       transition: 'background 0.1s', cursor: hasVersions ? 'pointer' : 'default',
                     }}
                     onClick={() => { if (hasVersions) setVersionItem(item); }}
                     onMouseEnter={e => e.currentTarget.style.background = 'var(--accent-hover)'}
                     onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                      <div style={{ overflow: 'hidden' }}>
+                      <div className="a-name" style={{ overflow: 'hidden' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                           <span style={{ fontFamily: "'JetBrains Mono'", fontSize: 'var(--text-base)', fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.name}</span>
                           {hasVersions && (
@@ -348,24 +341,23 @@ go build -o basecamp .
                         <div style={{ fontSize: 'var(--text-sm)', color: 'var(--fg3)', marginTop: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.detail}</div>
                       </div>
 
-                      <div style={{ display: 'flex', justifyContent: 'center' }}>
+                      <div className="a-status" style={{ display: 'flex', justifyContent: 'center' }}>
                         <StatusBadge status={item.status} />
                       </div>
 
-                      <div style={{ fontSize: 'var(--text-sm)', color: 'var(--fg2)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', lineHeight: 1.4 }}>
+                      <div className="a-info" style={{ fontSize: 'var(--text-sm)', color: 'var(--fg2)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', lineHeight: 1.4 }}>
                         {item.systemNote || '-'}
                       </div>
 
-                      <div style={{ display: 'flex', justifyContent: 'center' }}>
-                        <button
+                      <div className="a-note" style={{ display: 'flex', justifyContent: 'center' }}>
+                        <button className="icon-btn"
                           onClick={(e) => { e.stopPropagation(); setModalItem(item); }}
                           title={hasUserNote ? 'View your note' : 'Add a note'}
+                          aria-label={hasUserNote ? 'View your note' : 'Add a note'}
                           style={{
-                            width: '2rem', height: '2rem', borderRadius: '0.5rem', border: 'none', cursor: 'pointer',
                             background: hasUserNote ? 'var(--accent-bg)' : 'transparent',
                             color: hasUserNote ? 'var(--accent)' : 'var(--fg4)',
-                            fontSize: 'var(--text-base)', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            transition: 'all 0.12s',
+                            fontSize: 'var(--text-lg)', transition: 'all 0.12s',
                           }}
                           onMouseEnter={e => { e.currentTarget.style.background = 'rgba(129,140,248,0.15)'; e.currentTarget.style.color = 'var(--accent)'; }}
                           onMouseLeave={e => { e.currentTarget.style.background = hasUserNote ? 'var(--accent-bg)' : 'transparent'; e.currentTarget.style.color = hasUserNote ? 'var(--accent)' : 'var(--fg4)'; }}
