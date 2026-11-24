@@ -22,9 +22,9 @@ const STATUS = {
 const statusCfg = s => STATUS[s] || STATUS.unknown;
 
 const MONO = "'JetBrains Mono', monospace";
-const card = { background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 9 };
+const card = { background: 'var(--card)', border: '1px solid var(--border)', borderRadius: '0.75rem' };
 const sectionTitle = {
-  fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--fg3)',
+  fontSize: 'var(--text-xs)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--fg3)',
 };
 
 /** Loads /jobs.json; App uses it for the sidebar badge and passes it to <JobsView>. */
@@ -54,20 +54,20 @@ export function JobsNavButton({ jobs, active, onClick }) {
   const red = jobs.data ? jobs.data.jobs.filter(j => j.red).length : 0;
   const warn = jobs.data ? jobs.data.jobs.filter(j => j.status === 'warning').length : 0;
   return (
-    <button onClick={onClick} onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)} style={{
-      display: 'flex', alignItems: 'center', gap: 9, width: '100%',
-      padding: '8px 10px', borderRadius: 7, border: 'none', cursor: 'pointer',
+    <button className="nav-btn" onClick={onClick} onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)} style={{
+      display: 'flex', alignItems: 'center', gap: '0.75rem', width: '100%',
+      padding: '0.625rem 0.75rem', borderRadius: '0.5rem', border: 'none', cursor: 'pointer',
       background: active ? 'var(--accent-bg)' : hov ? 'var(--accent-hover)' : 'transparent',
       color: active ? 'var(--accent)' : hov ? 'var(--fg)' : 'var(--fg2)',
-      fontSize: 13, fontWeight: active ? 600 : 400, transition: 'all 0.12s', textAlign: 'left',
-      fontFamily: 'inherit', marginBottom: 6, borderBottom: '1px solid var(--border)',
+      fontSize: 'var(--text-base)', fontWeight: active ? 600 : 400, transition: 'all 0.12s', textAlign: 'left',
+      fontFamily: 'inherit', marginBottom: '0.5rem', borderBottom: '1px solid var(--border)',
     }}>
-      <span style={{ fontSize: 14, width: 20, textAlign: 'center' }}>⏱</span>
+      <span style={{ fontSize: 'var(--text-base)', width: '1.5rem', textAlign: 'center' }}>⏱</span>
       <span style={{ flex: 1 }}>Jobs</span>
       {(red > 0 || warn > 0) && (
         <span style={{
-          fontSize: 10, fontWeight: 700, minWidth: 18, height: 18, padding: '0 5px',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 9,
+          fontSize: 'var(--text-xs)', fontWeight: 700, minWidth: '1.5rem', height: '1.5rem', padding: '0 0.375rem',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '0.75rem',
           background: red ? 'rgba(248,113,113,0.12)' : 'rgba(251,191,36,0.12)',
           color: red ? 'var(--red)' : 'var(--yellow)',
         }}>{red || warn}</span>
@@ -115,8 +115,8 @@ function Badge({ status }) {
   const c = statusCfg(status);
   return (
     <span style={{
-      fontSize: 10, fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase',
-      padding: '3px 0', borderRadius: 4, color: c.color, background: c.bg, width: 70,
+      fontSize: 'var(--text-xs)', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase',
+      padding: '0.25rem 0', borderRadius: '0.375rem', color: c.color, background: c.bg, width: '5.5rem',
       display: 'inline-flex', justifyContent: 'center', flexShrink: 0,
     }}>{c.label}</span>
   );
@@ -132,7 +132,7 @@ function Chip({ tone = 'muted', children, title }) {
   const [color, bg] = tones[tone];
   return (
     <span title={title} style={{
-      fontSize: 11, color, background: bg, padding: '2px 7px', borderRadius: 4, whiteSpace: 'nowrap',
+      fontSize: 'var(--text-sm)', color, background: bg, padding: '2px 0.5rem', borderRadius: '0.375rem', whiteSpace: 'nowrap',
     }}>{children}</span>
   );
 }
@@ -184,21 +184,21 @@ function NightTimeline({ jobs }) {
   for (let m = start; m <= end; m += 30) ticks.push(m);
 
   return (
-    <div style={{ ...card, padding: '14px 16px 10px', marginBottom: 18 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
+    <div style={{ ...card, padding: '1rem 1.25rem 0.75rem', marginBottom: '1.5rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem 1rem', marginBottom: '0.75rem' }}>
         <span style={sectionTitle}>Last night, {fmtHM(start)} to {fmtHM(end)}</span>
-        <span style={{ fontSize: 11, color: 'var(--fg3)', display: 'flex', gap: 12 }}>
-          <span><span style={{ display: 'inline-block', width: 7, height: 7, border: '1.5px solid var(--fg3)', borderRadius: 2, marginRight: 4 }} />scheduled</span>
-          <span><span style={{ display: 'inline-block', width: 14, height: 5, background: 'var(--green)', borderRadius: 2, marginRight: 4, verticalAlign: 'middle' }} />ran</span>
+        <span style={{ fontSize: 'var(--text-sm)', color: 'var(--fg3)', display: 'flex', gap: '1rem' }}>
+          <span><span style={{ display: 'inline-block', width: '0.5rem', height: '0.5rem', border: '1.5px solid var(--fg3)', borderRadius: 2, marginRight: '0.375rem' }} />scheduled</span>
+          <span><span style={{ display: 'inline-block', width: '1rem', height: '0.375rem', background: 'var(--green)', borderRadius: 2, marginRight: '0.375rem', verticalAlign: 'middle' }} />ran</span>
         </span>
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: '190px 1fr', rowGap: 5, alignItems: 'center' }}>
+      <div className="timeline-grid">
         <div />
-        <div style={{ position: 'relative', height: 14 }}>
+        <div style={{ position: 'relative', height: '1rem' }}>
           {ticks.map(m => (
             <span key={m} style={{
               position: 'absolute', left: pct(m), transform: 'translateX(-50%)',
-              fontSize: 10, color: 'var(--fg4)', fontFamily: MONO,
+              fontSize: 'var(--text-xs)', color: 'var(--fg4)', fontFamily: MONO,
             }}>{m % 60 === 0 ? fmtHM(m) : ''}</span>
           ))}
         </div>
@@ -224,24 +224,24 @@ function NightTimeline({ jobs }) {
             : `${j.label}: no run for the latest slot · ${statusCfg(j.status).label}`;
           return (
             <React.Fragment key={j.label}>
-              <div style={{ fontSize: 11.5, fontFamily: MONO, color: 'var(--fg2)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', paddingRight: 10 }} title={j.label}>
+              <div style={{ fontSize: 'var(--text-sm)', fontFamily: MONO, color: 'var(--fg2)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', paddingRight: '0.75rem' }} title={j.label}>
                 {j.label.replace(/^(com|local)\./, '')}
               </div>
-              <div title={title} style={{ position: 'relative', height: 18, borderRadius: 4, background: 'rgba(255,255,255,0.015)' }}>
+              <div title={title} style={{ position: 'relative', height: '1.5rem', borderRadius: '0.375rem', background: 'rgba(255,255,255,0.015)' }}>
                 {ticks.map(m => (
                   <span key={m} style={{ position: 'absolute', left: pct(m), top: 0, bottom: 0, width: 1, background: m % 60 === 0 ? 'var(--border2)' : 'var(--border)' }} />
                 ))}
                 {j.slots.map(sl => (
                   <span key={sl} style={{
-                    position: 'absolute', left: pct(parseHM(sl)), top: 4, width: 8, height: 8, marginLeft: -4,
+                    position: 'absolute', left: pct(parseHM(sl)), top: '0.375rem', width: '0.625rem', height: '0.625rem', marginLeft: '-0.25rem',
                     border: `1.5px solid ${RED.has(j.status) && !inWindow ? color : 'var(--fg3)'}`, borderRadius: 2,
                     borderStyle: RED.has(j.status) && !inWindow ? 'dashed' : 'solid',
                   }} />
                 ))}
                 {inWindow && (
                   <span style={{
-                    position: 'absolute', left: pct(barL), width: `${(barW / span) * 100}%`, minWidth: 5,
-                    top: 5, height: 8, borderRadius: 3, background: color, opacity: 0.9,
+                    position: 'absolute', left: pct(barL), width: `${(barW / span) * 100}%`, minWidth: '0.375rem',
+                    top: '0.375rem', height: '0.625rem', borderRadius: '0.25rem', background: color, opacity: 0.9,
                   }} />
                 )}
               </div>
@@ -260,25 +260,22 @@ function JobRow({ job, open, onToggle }) {
   const lastRun = job.kind === 'service' ? (job.pid ? `pid ${job.pid}` : 'not running') : (when(job.lastRun) || 'no run seen');
   return (
     <div style={{ borderBottom: '1px solid var(--border)' }}>
-      <div onClick={onToggle} style={{
-        display: 'grid', gridTemplateColumns: '70px minmax(130px, 1fr) 105px 110px minmax(0, 2fr) 14px',
-        gap: 12, padding: '10px 16px', alignItems: 'center', cursor: 'pointer',
-      }}
+      <div className="job-grid" onClick={onToggle} style={{ padding: '0.75rem 1.25rem', minHeight: 'var(--tap)', cursor: 'pointer' }}
         onMouseEnter={e => (e.currentTarget.style.background = 'var(--accent-hover)')}
         onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
-        <Badge status={job.status} />
-        <div style={{ overflow: 'hidden' }}>
-          <div style={{ fontFamily: MONO, fontSize: 12.5, fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{job.label}</div>
+        <span className="a-badge"><Badge status={job.status} /></span>
+        <div className="a-name" style={{ overflow: 'hidden' }}>
+          <div style={{ fontFamily: MONO, fontSize: 'var(--text-base)', fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{job.label}</div>
         </div>
-        <div style={{ fontSize: 12, color: 'var(--fg2)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{job.schedule}</div>
-        <div style={{ fontSize: 12, color: 'var(--fg2)', whiteSpace: 'nowrap' }} title={job.lastRunSource ? `from ${job.lastRunSource}` : ''}>{lastRun}</div>
-        <div style={{ fontSize: 12, color: RED.has(job.status) ? c.color : 'var(--fg2)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+        <div className="a-sched" style={{ fontSize: 'var(--text-sm)', color: 'var(--fg2)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{job.schedule}</div>
+        <div className="a-last" style={{ fontSize: 'var(--text-sm)', color: 'var(--fg2)', whiteSpace: 'nowrap' }} title={job.lastRunSource ? `from ${job.lastRunSource}` : ''}>{lastRun}</div>
+        <div className="a-result" style={{ fontSize: 'var(--text-sm)', color: RED.has(job.status) ? c.color : 'var(--fg2)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
           {resultLine(job)}
         </div>
-        <span style={{ color: 'var(--fg4)', fontSize: 11, transform: open ? 'rotate(90deg)' : 'none', transition: 'transform 0.12s' }}>▸</span>
+        <span className="a-chev" style={{ color: 'var(--fg4)', fontSize: 'var(--text-sm)', transform: open ? 'rotate(90deg)' : 'none', transition: 'transform 0.12s' }}>▸</span>
       </div>
       {!open && job.snapshots?.length > 0 && (
-        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', padding: '0 16px 10px 98px', marginTop: -2 }}>
+        <div className="job-indent" style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', paddingRight: '1.25rem', paddingBottom: '0.75rem', marginTop: -2 }}>
           {job.snapshots.map(s => <SnapshotChips key={s.name} snap={s} compact />)}
         </div>
       )}
@@ -291,7 +288,7 @@ function SnapshotChips({ snap, compact }) {
   const age = snap.error ? null : snap.ageHours < 36 ? `${Math.round(snap.ageHours)} h old` : `${(snap.ageHours / 24).toFixed(1)} days old`;
   const off = snap.offsite && OFFSITE[snap.offsite];
   return (
-    <span style={{ display: 'inline-flex', gap: 5, alignItems: 'center' }}>
+    <span style={{ display: 'inline-flex', gap: '0.375rem', alignItems: 'center' }}>
       <Chip tone={snap.stale ? 'bad' : 'good'} title={snap.file || snap.error}>
         {snap.name}: {snap.error ? 'no snapshot' : age}
       </Chip>
@@ -307,22 +304,22 @@ function JobDetail({ job }) {
   const kv = (k, v) => v ? (
     <div style={{ display: 'contents' }}>
       <span style={{ color: 'var(--fg3)' }}>{k}</span>
-      <span style={{ fontFamily: MONO, fontSize: 11.5, color: 'var(--fg2)', wordBreak: 'break-all' }}>{v}</span>
+      <span style={{ fontFamily: MONO, fontSize: 'var(--text-sm)', color: 'var(--fg2)', wordBreak: 'break-all' }}>{v}</span>
     </div>
   ) : null;
   const exit = job.lastExit === undefined || job.lastExit === null ? 'never exited since load' : String(job.lastExit);
   return (
-    <div className="slide-in" style={{ padding: '4px 16px 16px 98px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+    <div className="slide-in job-indent" style={{ paddingTop: '0.375rem', paddingRight: '1.25rem', paddingBottom: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1rem', minWidth: 0 }}>
       {(job.reasons?.length > 0 || job.notes?.length > 0) && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-          {job.reasons.map((r, i) => <div key={`r${i}`} style={{ fontSize: 12.5, color: statusCfg(job.status).color }}>• {r}</div>)}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.375rem' }}>
+          {job.reasons.map((r, i) => <div key={`r${i}`} style={{ fontSize: 'var(--text-base)', color: statusCfg(job.status).color }}>• {r}</div>)}
           {job.notes.map((n, i) => (
-            <div key={`n${i}`} style={{ fontSize: 12.5, color: n.level === 'warn' ? 'var(--yellow)' : 'var(--fg3)' }}>• {n.text}</div>
+            <div key={`n${i}`} style={{ fontSize: 'var(--text-base)', color: n.level === 'warn' ? 'var(--yellow)' : 'var(--fg3)' }}>• {n.text}</div>
           ))}
         </div>
       )}
       {job.report && (
-        <div style={{ fontSize: 12.5, color: 'var(--fg2)' }}>
+        <div style={{ fontSize: 'var(--text-base)', color: 'var(--fg2)' }}>
           <span style={{ color: 'var(--fg3)' }}>Status file: </span>
           {job.report.ok === false ? 'failed' : 'ok'}{job.report.summary ? `, ${job.report.summary}` : ''}
           {job.report.finished ? ` (finished ${when(job.report.finished)})` : ''}
@@ -330,13 +327,13 @@ function JobDetail({ job }) {
       )}
       {job.snapshots?.length > 0 && (
         <div>
-          <div style={{ ...sectionTitle, marginBottom: 6 }}>Backups</div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'auto auto 1fr', gap: '5px 14px', fontSize: 12, alignItems: 'center' }}>
+          <div style={{ ...sectionTitle, marginBottom: '0.5rem' }}>Backups</div>
+          <div className="backups-grid" style={{ fontSize: 'var(--text-sm)' }}>
             {job.snapshots.map(s => {
               const off = s.offsite && OFFSITE[s.offsite];
               return (
                 <React.Fragment key={s.name}>
-                  <span style={{ fontFamily: MONO, color: 'var(--fg2)' }}>{s.file || s.name}</span>
+                  <span style={{ fontFamily: MONO, color: 'var(--fg2)', overflowWrap: 'anywhere' }}>{s.file || s.name}</span>
                   <Chip tone={s.stale ? 'bad' : 'good'}>{s.error ? s.error : `${when(s.at)}${s.source === 'log' ? ' (from log)' : ''}`}</Chip>
                   <span>{off ? <Chip tone={off[0]}>{off[1](s)}</Chip> : null}</span>
                 </React.Fragment>
@@ -345,7 +342,7 @@ function JobDetail({ job }) {
           </div>
         </div>
       )}
-      <div style={{ display: 'grid', gridTemplateColumns: '90px 1fr', gap: '4px 12px', fontSize: 12 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '7rem 1fr', gap: '0.375rem 1rem', fontSize: 'var(--text-sm)' }}>
         {kv('Command', job.command)}
         {kv('Runs', `${job.runs} since load · last exit ${exit}${job.pid ? ` · pid ${job.pid}` : ''}`)}
         {kv('Last run', job.lastRun ? `${when(job.lastRun)} (${job.lastRunSource})${job.runStart && job.runEnd && job.runEnd !== job.runStart ? `, ${hm(new Date(job.runStart))} to ${hm(new Date(job.runEnd))}` : ''}` : '')}
@@ -354,16 +351,16 @@ function JobDetail({ job }) {
       </div>
       {job.log && (
         <div>
-          <div style={{ ...sectionTitle, marginBottom: 6, display: 'flex', justifyContent: 'space-between', gap: 10 }}>
+          <div style={{ ...sectionTitle, marginBottom: '0.5rem', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.25rem 0.75rem' }}>
             <span>Log tail</span>
-            <span style={{ fontFamily: MONO, textTransform: 'none', letterSpacing: 0, fontWeight: 400 }}>
+            <span style={{ fontFamily: MONO, textTransform: 'none', letterSpacing: 0, fontWeight: 400, overflowWrap: 'anywhere' }}>
               {job.log.path}{job.log.modTime ? ` · written ${ago(job.log.modTime)}` : ''}
             </span>
           </div>
           <pre style={{
-            margin: 0, background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 7,
-            padding: '10px 12px', fontSize: 11.5, lineHeight: 1.55, fontFamily: MONO, color: 'var(--fg2)',
-            maxHeight: 260, overflow: 'auto', whiteSpace: 'pre-wrap', wordBreak: 'break-word',
+            margin: 0, background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '0.5rem',
+            padding: '0.75rem 1rem', fontSize: 'var(--text-sm)', lineHeight: 1.55, fontFamily: MONO, color: 'var(--fg2)',
+            maxHeight: '20rem', overflow: 'auto', whiteSpace: 'pre-wrap', wordBreak: 'break-word',
           }}>
             {job.log.error ? <span style={{ color: 'var(--yellow)' }}>{job.log.error}</span>
               : job.log.tail.length === 0 ? <span style={{ color: 'var(--fg3)' }}>(empty)</span>
@@ -374,7 +371,7 @@ function JobDetail({ job }) {
               })}
           </pre>
           {job.errors?.length > 0 && !job.log.tail.some(l => errSet.has(l)) && (
-            <div style={{ marginTop: 6, fontSize: 11.5, fontFamily: MONO, color: 'var(--red)' }}>
+            <div style={{ marginTop: '0.5rem', fontSize: 'var(--text-sm)', fontFamily: MONO, color: 'var(--red)' }}>
               {job.errors.map((e, i) => <div key={i}>{e}</div>)}
             </div>
           )}
@@ -394,13 +391,13 @@ export default function JobsView({ jobs }) {
 
   if (!data) {
     return (
-      <div style={{ padding: 32, maxWidth: 640 }}>
-        <h2 style={{ fontSize: 19, fontWeight: 700, marginBottom: 8 }}>Jobs</h2>
-        <p style={{ fontSize: 13, color: 'var(--fg3)', lineHeight: 1.6, marginBottom: 14 }}>
+      <div className="page" style={{ maxWidth: '50rem', marginLeft: 0 }}>
+        <h2 style={{ fontSize: 'var(--text-2xl)', fontWeight: 700, marginBottom: '0.625rem' }}>Jobs</h2>
+        <p style={{ fontSize: 'var(--text-base)', color: 'var(--fg3)', lineHeight: 1.6, marginBottom: '1rem' }}>
           {loading ? 'Loading jobs…' : `${error}. Run the check once, or install the 15-minute job with scripts/install-service.sh:`}
         </p>
         {!loading && (
-          <pre style={{ ...card, padding: 14, fontSize: 12, fontFamily: MONO, color: 'var(--fg2)' }}>{'cd cli && go build -o basecamp . && ./basecamp jobs'}</pre>
+          <pre style={{ ...card, padding: '1rem', fontSize: 'var(--text-sm)', fontFamily: MONO, color: 'var(--fg2)' }}>{'cd cli && go build -o basecamp . && ./basecamp jobs'}</pre>
         )}
       </div>
     );
@@ -417,24 +414,22 @@ export default function JobsView({ jobs }) {
   const otherGaps = gaps.filter(f => !/wiped on reboot/.test(f.text));
 
   return (
-    <div className="slide-in" style={{ padding: '24px 32px 48px' }}>
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 18, gap: 16 }}>
+    <div className="slide-in page">
+      <div className="page-head wrap">
         <div>
-          <h2 style={{ fontSize: 19, fontWeight: 700, letterSpacing: '-0.02em', display: 'flex', alignItems: 'center', gap: 9, marginBottom: 4 }}>
+          <h2 style={{ fontSize: 'var(--text-2xl)', fontWeight: 700, letterSpacing: '-0.02em', display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.375rem' }}>
             <span>⏱</span>Jobs
           </h2>
-          <p style={{ fontSize: 13, color: 'var(--fg3)' }}>
+          <p style={{ fontSize: 'var(--text-base)', color: 'var(--fg3)' }}>
             Scheduled LaunchAgents on {data.host}, checked every 15 minutes · last check {ago(data.generatedAt)}
             {stale && <span style={{ color: 'var(--red)' }}> (is com.basecamp-jobs running?)</span>}
           </p>
         </div>
-        <button onClick={reload} style={{
-          padding: '7px 12px', fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
-          background: 'var(--card2)', color: 'var(--fg)', border: '1px solid var(--border2)', borderRadius: 7,
-        }}>{loading ? '⟳ Loading…' : '↻ Reload'}</button>
+        {/* Keeps its label while loading (dimmed), so the header doesn't shift */}
+        <button className="btn" onClick={reload} disabled={loading} aria-busy={loading}>↻ Reload</button>
       </div>
 
-      <div style={{ ...card, display: 'flex', gap: 20, padding: '12px 16px', marginBottom: 12, fontSize: 12, alignItems: 'center', flexWrap: 'wrap' }}>
+      <div style={{ ...card, display: 'flex', gap: '1.5rem', padding: '1rem 1.25rem', marginBottom: '1rem', fontSize: 'var(--text-sm)', alignItems: 'center', flexWrap: 'wrap' }}>
         <span style={{ fontWeight: 700, color: red.length ? 'var(--red)' : 'var(--green)' }}>
           ● {red.length ? `${red.length} need${red.length === 1 ? 's' : ''} attention` : 'All jobs fine'}
         </span>
@@ -447,18 +442,18 @@ export default function JobsView({ jobs }) {
       </div>
 
       {(otherGaps.length > 0 || tmpLabels.length > 0) && (
-        <div style={{ ...card, padding: '12px 16px', marginBottom: 18 }}>
-          <div style={{ ...sectionTitle, marginBottom: 6 }}>Gaps</div>
+        <div style={{ ...card, padding: '1rem 1.25rem', marginBottom: '1.5rem' }}>
+          <div style={{ ...sectionTitle, marginBottom: '0.5rem' }}>Gaps</div>
           {otherGaps.map((f, i) => (
-            <div key={i} style={{ fontSize: 12.5, color: 'var(--fg2)', padding: '4px 0', borderTop: i ? '1px solid var(--border)' : 'none' }}>
+            <div key={i} style={{ fontSize: 'var(--text-base)', color: 'var(--fg2)', padding: '0.375rem 0', borderTop: i ? '1px solid var(--border)' : 'none' }}>
               <span style={{ color: f.level === 'error' ? 'var(--red)' : 'var(--yellow)' }}>⚠</span>{' '}
-              <span style={{ fontFamily: MONO, fontSize: 12 }}>{f.label}</span>: {f.text}
+              <span style={{ fontFamily: MONO, fontSize: 'var(--text-sm)' }}>{f.label}</span>: {f.text}
             </div>
           ))}
           {tmpLabels.length > 0 && (
-            <div style={{ fontSize: 12.5, color: 'var(--fg2)', padding: '4px 0', borderTop: otherGaps.length ? '1px solid var(--border)' : 'none' }}>
+            <div style={{ fontSize: 'var(--text-base)', color: 'var(--fg2)', padding: '0.375rem 0', borderTop: otherGaps.length ? '1px solid var(--border)' : 'none' }}>
               <span style={{ color: 'var(--yellow)' }}>⚠</span> Logging to /tmp (lost on reboot):{' '}
-              <span style={{ fontFamily: MONO, fontSize: 12 }}>{tmpLabels.join(', ')}</span>
+              <span style={{ fontFamily: MONO, fontSize: 'var(--text-sm)' }}>{tmpLabels.join(', ')}</span>
             </div>
           )}
         </div>
@@ -466,10 +461,9 @@ export default function JobsView({ jobs }) {
 
       <NightTimeline jobs={scheduled} />
 
-      <div style={{ ...card, overflow: 'hidden', marginBottom: 18 }}>
-        <div style={{
-          display: 'grid', gridTemplateColumns: '70px minmax(130px, 1fr) 105px 110px minmax(0, 2fr) 14px',
-          gap: 12, padding: '8px 16px', ...sectionTitle, color: 'var(--fg4)', borderBottom: '1px solid var(--border)',
+      <div style={{ ...card, overflow: 'hidden', marginBottom: '1.5rem' }}>
+        <div className="job-grid grid-head" style={{
+          padding: '0.625rem 1.25rem', ...sectionTitle, color: 'var(--fg4)', borderBottom: '1px solid var(--border)',
         }}>
           <span>Status</span><span>Job</span><span>Schedule</span><span>Last run</span><span>Result</span><span />
         </div>
@@ -477,8 +471,8 @@ export default function JobsView({ jobs }) {
       </div>
 
       {services.length > 0 && (
-        <div style={{ marginBottom: 18 }}>
-          <div style={{ ...sectionTitle, marginBottom: 8 }}>Always-on services</div>
+        <div style={{ marginBottom: '1.5rem' }}>
+          <div style={{ ...sectionTitle, marginBottom: '0.625rem' }}>Always-on services</div>
           <div style={{ ...card, overflow: 'hidden' }}>
             {[...services, ...other].map(j => <JobRow key={j.label} job={j} open={!!open[j.label]} onToggle={() => toggle(j.label)} />)}
           </div>
@@ -486,17 +480,17 @@ export default function JobsView({ jobs }) {
       )}
 
       {data.thirdParty?.length > 0 && (
-        <div style={{ marginBottom: 18 }}>
+        <div style={{ marginBottom: '1.5rem' }}>
           <button onClick={() => setShowThirdParty(v => !v)} style={{
-            ...sectionTitle, background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontFamily: 'inherit',
+            ...sectionTitle, background: 'none', border: 'none', cursor: 'pointer', padding: 0, minHeight: 'var(--tap)',
           }}>{showThirdParty ? '▾' : '▸'} Third-party agents ({data.thirdParty.length})</button>
           {showThirdParty && (
-            <div style={{ ...card, padding: '8px 16px', marginTop: 8 }}>
+            <div style={{ ...card, padding: '0.625rem 1.25rem', marginTop: '0.625rem' }}>
               {data.thirdParty.map(t => (
-                <div key={t.label} style={{ display: 'flex', gap: 12, fontSize: 12, padding: '4px 0', color: 'var(--fg2)' }}>
-                  <span style={{ fontFamily: MONO, flex: 1 }}>{t.label}</span>
+                <div key={t.label} style={{ display: 'flex', gap: '1rem', fontSize: 'var(--text-sm)', padding: '0.375rem 0', color: 'var(--fg2)' }}>
+                  <span style={{ fontFamily: MONO, flex: 1, minWidth: 0, overflowWrap: 'anywhere' }}>{t.label}</span>
                   <span style={{ color: 'var(--fg3)' }}>{t.kind}</span>
-                  <span style={{ color: t.loaded ? 'var(--green)' : 'var(--fg4)', width: 70 }}>{t.loaded ? 'loaded' : 'not loaded'}</span>
+                  <span style={{ color: t.loaded ? 'var(--green)' : 'var(--fg4)', width: '5.5rem' }}>{t.loaded ? 'loaded' : 'not loaded'}</span>
                 </div>
               ))}
             </div>
@@ -504,7 +498,7 @@ export default function JobsView({ jobs }) {
         </div>
       )}
 
-      <p style={{ fontSize: 12, color: 'var(--fg3)', lineHeight: 1.6, maxWidth: 760 }}>
+      <p style={{ fontSize: 'var(--text-sm)', color: 'var(--fg3)', lineHeight: 1.6, maxWidth: '59rem' }}>
         A job can say what it did by writing <code style={{ fontFamily: MONO }}>{'~/Library/Application Support/jobs/<label>.json'}</code>{' '}
         with <code style={{ fontFamily: MONO }}>ok</code>, <code style={{ fontFamily: MONO }}>started</code>, <code style={{ fontFamily: MONO }}>finished</code> and{' '}
         <code style={{ fontFamily: MONO }}>summary</code> (see the README).

@@ -52,42 +52,35 @@ export default function VersionDetail({ item, onClose }) {
   const statusLabel = { installed: 'Installed', missing: 'Missing', extra: 'Extra', differs: 'Different' };
 
   return (
-    <div onClick={onClose} style={{
-      position: 'fixed', inset: 0, zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center',
-      background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)',
-    }}>
-      <div onClick={e => e.stopPropagation()} style={{
-        background: '#16171b', border: '1px solid #2a2a32', borderRadius: 14,
-        width: 520, maxWidth: '92vw', maxHeight: '85vh', display: 'flex', flexDirection: 'column',
-        boxShadow: '0 24px 80px rgba(0,0,0,0.5)', overflow: 'hidden',
+    <div className="modal-scrim" onClick={onClose}>
+      <div className="modal" onClick={e => e.stopPropagation()} style={{
+        width: '44rem', maxHeight: '85vh', display: 'flex', flexDirection: 'column', overflow: 'hidden',
       }}>
         {/* Header */}
-        <div style={{ padding: '24px 24px 20px', flexShrink: 0 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 18 }}>
+        <div style={{ padding: '1.75rem 1.75rem 1.25rem', flexShrink: 0 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
             <div>
-              <div style={{ fontSize: 17, fontWeight: 700, marginBottom: 3 }}>{item.name}</div>
-              <div style={{ fontSize: 12, color: 'var(--fg3)' }}>
+              <div style={{ fontSize: 'var(--text-xl)', fontWeight: 700, marginBottom: '0.25rem' }}>{item.name}</div>
+              <div style={{ fontSize: 'var(--text-sm)', color: 'var(--fg3)' }}>
                 {item.versions.length} versions via {item.versionManager}
               </div>
             </div>
-            <button onClick={onClose} style={{
-              background: 'none', border: 'none', color: 'var(--fg3)', fontSize: 18, cursor: 'pointer', padding: '0 4px',
-            }}>✕</button>
+            <button className="icon-btn" onClick={onClose} aria-label="Close" style={{ color: 'var(--fg3)', fontSize: 'var(--text-xl)', margin: '-0.5rem -0.5rem 0 0' }}>✕</button>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <span style={{ fontSize: 12, color: 'var(--fg3)', fontWeight: 500 }}>Reviewing</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+            <span style={{ fontSize: 'var(--text-sm)', color: 'var(--fg3)', fontWeight: 500 }}>Reviewing</span>
             <select
               value={activeIdx}
               onChange={e => setActiveIdx(parseInt(e.target.value))}
               style={{
-                padding: '7px 32px 7px 12px', fontSize: 13, fontWeight: 600,
+                minHeight: '2.75rem', maxWidth: '100%', padding: '0.5rem 2.5rem 0.5rem 1rem', fontSize: 'var(--text-base)', fontWeight: 600,
                 fontFamily: "'JetBrains Mono', monospace",
                 background: 'var(--card)', color: 'var(--fg)',
-                border: '1px solid var(--border2)', borderRadius: 7,
+                border: '1px solid var(--border2)', borderRadius: '0.5rem',
                 outline: 'none', cursor: 'pointer', appearance: 'none',
                 backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2371717a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`,
-                backgroundRepeat: 'no-repeat', backgroundPosition: 'right 10px center',
+                backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.75rem center',
               }}>
               {item.versions.map((v, i) => {
                 let gapCount = 0;
@@ -101,29 +94,29 @@ export default function VersionDetail({ item, onClose }) {
             </select>
             {!isCurrent && missingPkgs.length > 0 && (
               <span style={{
-                fontSize: 11, fontWeight: 600, color: 'var(--red)',
-                background: 'rgba(248,113,113,0.1)', padding: '4px 8px', borderRadius: 5,
+                fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--red)',
+                background: 'rgba(248,113,113,0.1)', padding: '0.375rem 0.625rem', borderRadius: '0.375rem',
               }}>{missingPkgs.length} gap{missingPkgs.length > 1 ? 's' : ''}</span>
             )}
           </div>
         </div>
 
         {/* Content */}
-        <div style={{ flex: 1, overflow: 'auto', padding: '16px 24px 24px' }}>
+        <div style={{ flex: 1, overflow: 'auto', padding: '0.5rem 1.75rem 1.75rem' }}>
           {!isCurrent && (
             <div style={{
-              display: 'flex', gap: 16, fontSize: 12, marginBottom: 14, padding: '10px 14px',
-              background: 'rgba(255,255,255,0.02)', borderRadius: 7, border: '1px solid var(--border)',
+              display: 'flex', gap: '1.25rem', fontSize: 'var(--text-sm)', marginBottom: '1rem', padding: '0.75rem 1rem',
+              background: 'rgba(255,255,255,0.02)', borderRadius: '0.5rem', border: '1px solid var(--border)',
             }}>
               <span><span style={{ color: 'var(--green)' }}>●</span> <strong>{rows.filter(r => r.status === 'installed' || r.status === 'differs').length}</strong> <span style={{ color: 'var(--fg3)' }}>installed</span></span>
               {missingPkgs.length > 0 && <span><span style={{ color: 'var(--red)' }}>●</span> <strong>{missingPkgs.length}</strong> <span style={{ color: 'var(--fg3)' }}>missing vs current</span></span>}
             </div>
           )}
 
-          <div style={{ background: 'var(--card)', borderRadius: 8, border: '1px solid var(--border)', overflow: 'hidden' }}>
+          <div style={{ background: 'var(--card)', borderRadius: '0.625rem', border: '1px solid var(--border)', overflow: 'hidden' }}>
             <div style={{
-              display: 'grid', gridTemplateColumns: '1fr 90px 72px',
-              gap: 8, padding: '7px 14px', fontSize: 10, fontWeight: 700,
+              display: 'grid', gridTemplateColumns: '1fr 7rem 5.75rem',
+              gap: '0.625rem', padding: '0.5rem 1rem', fontSize: 'var(--text-xs)', fontWeight: 700,
               textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--fg4)',
               borderBottom: '1px solid var(--border)',
             }}>
@@ -134,30 +127,30 @@ export default function VersionDetail({ item, onClose }) {
 
             {rows.map((row, i) => (
               <div key={row.name} style={{
-                display: 'grid', gridTemplateColumns: '1fr 90px 72px',
-                gap: 8, padding: '8px 14px', alignItems: 'center',
+                display: 'grid', gridTemplateColumns: '1fr 7rem 5.75rem',
+                gap: '0.625rem', padding: '0.625rem 1rem', alignItems: 'center',
                 borderBottom: i < rows.length - 1 ? '1px solid var(--border)' : 'none',
                 background: row.status === 'missing' ? 'rgba(248,113,113,0.03)' : 'transparent',
               }}>
                 <div style={{
-                  fontFamily: "'JetBrains Mono'", fontSize: 12, fontWeight: 500,
+                  fontFamily: "'JetBrains Mono'", fontSize: 'var(--text-sm)', fontWeight: 500, minWidth: 0, overflowWrap: 'anywhere',
                   color: row.status === 'missing' ? 'var(--red)' : 'var(--fg)',
                 }}>
                   {row.name}
                   {row.status === 'differs' && (
-                    <span style={{ color: 'var(--fg3)', fontSize: 11, marginLeft: 6 }}>current: {row.currentVersion}</span>
+                    <span style={{ color: 'var(--fg3)', fontSize: 'var(--text-sm)', marginLeft: '0.5rem' }}>current: {row.currentVersion}</span>
                   )}
                 </div>
-                <div style={{ textAlign: 'center', fontFamily: "'JetBrains Mono'", fontSize: 11, color: row.status === 'missing' ? 'var(--fg4)' : 'var(--fg3)' }}>
+                <div style={{ textAlign: 'center', fontFamily: "'JetBrains Mono'", fontSize: 'var(--text-sm)', color: row.status === 'missing' ? 'var(--fg4)' : 'var(--fg3)' }}>
                   {row.version || '-'}
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'center' }}>
                   {!isCurrent && (
                     <span style={{
-                      fontSize: 10, fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase',
-                      padding: '2px 0', borderRadius: 3, textAlign: 'center', width: 62,
+                      fontSize: 'var(--text-xs)', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase',
+                      padding: '2px 0', borderRadius: '0.25rem', textAlign: 'center', width: '4.75rem',
                       display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                      color: statusColor[row.status], background: `${statusColor[row.status]}11`,
+                      color: statusColor[row.status], background: `color-mix(in srgb, ${statusColor[row.status]} 10%, transparent)`,
                     }}>{statusLabel[row.status]}</span>
                   )}
                 </div>
@@ -166,13 +159,13 @@ export default function VersionDetail({ item, onClose }) {
           </div>
 
           {syncCmd && (
-            <div style={{ marginTop: 16 }}>
-              <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--fg3)', marginBottom: 6 }}>
+            <div style={{ marginTop: '1.25rem' }}>
+              <div style={{ fontSize: 'var(--text-xs)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--fg3)', marginBottom: '0.5rem' }}>
                 Sync to match current
               </div>
               <div style={{
-                background: 'var(--bg)', border: '1px solid var(--border2)', borderRadius: 7,
-                padding: '10px 14px', fontFamily: "'JetBrains Mono'", fontSize: 11.5,
+                background: 'var(--bg)', border: '1px solid var(--border2)', borderRadius: '0.5rem',
+                padding: '0.75rem 1rem', fontFamily: "'JetBrains Mono'", fontSize: 'var(--text-sm)',
                 color: 'var(--fg2)', lineHeight: 1.6, wordBreak: 'break-all',
               }}>{syncCmd}</div>
             </div>
