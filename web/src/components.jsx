@@ -36,9 +36,9 @@ export function StatusBadge({ status }) {
   const cfg = getStatusConfig(status);
   return (
     <span style={{
-      fontSize: 10, fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase',
-      padding: '3px 0', borderRadius: 4, color: cfg.color, background: cfg.bg,
-      textAlign: 'center', width: 62, display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+      fontSize: 'var(--text-xs)', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase',
+      padding: '0.25rem 0', borderRadius: '0.375rem', color: cfg.color, background: cfg.bg,
+      textAlign: 'center', width: '4.75rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
     }}>{cfg.label}</span>
   );
 }
@@ -74,11 +74,11 @@ export function PlaybookActions({ script, hostname }) {
     URL.revokeObjectURL(url);
   };
   const btn = {
-    padding: '7px 12px', fontSize: 12, fontWeight: 600, cursor: 'pointer', borderRadius: 7,
+    padding: '0.5rem 1rem', fontSize: 'var(--text-sm)', fontWeight: 600, cursor: 'pointer', borderRadius: '0.5rem',
     border: '1px solid var(--border2)', background: 'var(--card2)', color: 'var(--fg)', fontFamily: 'inherit',
   };
   return (
-    <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
+    <div style={{ display: 'flex', gap: '0.625rem', marginBottom: '1rem' }}>
       <button style={btn} onClick={copy}>{copied ? 'Copied' : 'Copy'}</button>
       <button style={btn} onClick={download}>Download .sh</button>
     </div>
