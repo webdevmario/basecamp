@@ -71,10 +71,10 @@ Mac (paths, hostnames, keys, dotfile contents).
    end-of-life, 22 brew packages outdated, mongodb-community installed but not running, a leftover
    "VPN by Google One" launch agent, Remote WSL and three Docker extensions in VS Code, a
    5.4-year-old SSH key.
-6. **What the first jobs scan found** (other projects, not this repo): borrowd has no
+5. **What the first jobs scan found** (other projects, not this repo): borrowd has no
    `backups/` folder yet so `local.borrowd.nightly` is red until its backup step lands;
    diecast-scout dumps aren't in the offsite image; stacks-backup, borrowd, rankd, stacks and
    tatertot log to `/tmp`; `com.springboard.plist` has an unescaped `&&`; no job writes a status
    file yet (docs/jobs.md shows how).
-5. Not verified in a browser: the playbook's "Download .sh" button (the Claude app's pane blocks
+6. Not verified in a browser: the playbook's "Download .sh" button (the Claude app's pane blocks
    downloads). Copy, notes, Run Scan and the version compare were checked on 2026-11-24.
