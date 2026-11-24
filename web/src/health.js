@@ -15,13 +15,6 @@ export function assessCategory(cat) {
       insights.push({ type: 'observe', text: `${shellFiles.length} shell config files detected; some may be redundant` });
   }
 
-  if (cat.id === 'brew') {
-    items.filter(i => i.status === 'outdated').forEach(p =>
-      insights.push({ type: 'update', text: `${p.name} has a newer version available` }));
-    items.filter(i => i.status === 'stale').forEach(p =>
-      insights.push({ type: 'cleanup', text: `${p.name}: ${p.systemNote || 'hasn\'t been used recently'}` }));
-  }
-
   if (cat.id === 'vscode') {
     items.filter(i => i.status === 'stale').forEach(e =>
       insights.push({ type: 'cleanup', text: `${e.name}: ${e.systemNote || 'may be removable'}` }));

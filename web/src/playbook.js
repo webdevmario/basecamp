@@ -15,26 +15,13 @@ export function generatePlaybook(data) {
     '  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"',
     'fi',
     '',
+    '# Packages: the Brewfile basecamp dotfiles keeps in your private repo',
+    '# (restore it first: basecamp dotfiles init <url>)',
+    'if [ -f ~/.basecamp/dotfiles/brew/Brewfile ]; then',
+    '  brew bundle --file=~/.basecamp/dotfiles/brew/Brewfile',
+    'fi',
+    '',
   ];
-
-  const brew = data.categories?.find(c => c.id === 'brew');
-  if (brew?.items) {
-    const formulae = brew.items
-      .filter(i => i.detail?.includes('formula') && i.status !== 'stale')
-      .map(i => i.name);
-    const casks = brew.items
-      .filter(i => i.detail?.includes('cask') && i.status !== 'stale')
-      .map(i => i.name.toLowerCase().replace(/ /g, '-'));
-
-    if (formulae.length) {
-      lines.push('brew install ' + formulae.join(' \\\n  '));
-      lines.push('');
-    }
-    if (casks.length) {
-      lines.push('brew install --cask ' + casks.join(' \\\n  '));
-      lines.push('');
-    }
-  }
 
   const vscode = data.categories?.find(c => c.id === 'vscode');
   if (vscode?.items) {
