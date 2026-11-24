@@ -50,12 +50,10 @@ Mac (paths, hostnames, keys, dotfile contents).
 
 ## Open work (as of 2026-11-24)
 
-1. **Public history (Mario's call).** Pass 1 untracked `web/public/scan.json`, `cli/basecamp`,
-   `web/node_modules` and `.DS_Store`, but the March 2026 scan and the binary are still in git
-   history on the public repo (no secrets: hostname, software inventory, launch agent names,
-   SSH key age, `/Users/Mario` build paths). Rewriting history or making the repo private is
-   Mario's decision. The main checkout has local edits to both files: move them aside before
-   `git pull` there, since upstream now deletes them.
+1. **Merge order:** PR #2 (pass 1) first, then #1 (dotfiles, stacked on #2) and the jobs PR
+   (rebased on #2). Before `git pull` in the main checkout, move aside its local edits to
+   `web/public/scan.json` and `cli/basecamp`, which #2 deletes. Public history: Mario decided on
+   2026-11-24 to leave the old scan and binary in history (no secrets in them).
 2. **`basecamp diff`** is not built (the old README called it "coming soon").
 3. **Parallel branches:** a Jobs view (`basecamp-jobs`) and config tracking (`basecamp-dotfiles`)
    build on `basecamp serve`. Each registers its routes with one line in `runServe`.
