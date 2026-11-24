@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/netip"
 	"os"
 	"path/filepath"
 	"strings"
@@ -78,6 +79,30 @@ func runServe(addr, webDir, dataDir string) {
 		})
 	}
 
-	fmt.Fprintf(os.Stderr, "basecamp serving on %s (web: %q, data: %s)\n", addr, webDir, dataDir)
-	log.Fatal(http.ListenAndServe(addr, mux))
+	fmt.Fprintf(os.Stderr, "basecamp serving on %s (web: %q, data: %s), tailnet and localhost only\n", addr, webDir, dataDir)
+	log.Fatal(http.ListenAndServe(addr, tailnetOnly(mux)))
+}
+
+// Tailscale hands out 100.64.0.0/10 and fd7a:115c:a1e0::/48. Anything else (the home LAN,
+// a forwarded port) gets a 403: scans and config diffs never leave the tailnet.
+var allowedNets = []netip.Prefix{
+	netip.MustParsePrefix("100.64.0.0/10"),
+	netip.MustParsePrefix("fd7a:115c:a1e0::/48"),
+}
+
+func tailnetOnly(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if ap, err := netip.ParseAddrPort(r.RemoteAddr); err == nil {
+			ip := ap.Addr().Unmap()
+			ok := ip.IsLoopback()
+			for _, p := range allowedNets {
+				ok = ok || p.Contains(ip)
+			}
+			if ok {
+				next.ServeHTTP(w, r)
+				return
+			}
+		}
+		http.Error(w, "basecamp is only reachable over the tailnet", http.StatusForbidden)
+	})
 }
