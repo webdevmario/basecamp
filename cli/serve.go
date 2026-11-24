@@ -19,6 +19,7 @@ import (
 //	POST /api/scan     run a scan now, save it, return it
 //	GET  /api/health   liveness plus when the last scan ran
 //	GET/PUT /api/notes per-item notes (notes_http.go)
+//	GET  /jobs.json, /api/jobs/status   see jobs_http.go
 //	GET  /*            the dashboard (webDir)
 func runServe(addr, webDir, dataDir string) {
 	dataDir = expandHome(dataDir)
@@ -63,6 +64,7 @@ func runServe(addr, webDir, dataDir string) {
 	})
 
 	registerNotesRoutes(mux, dataDir)
+	registerJobsRoutes(mux, dataDir)
 
 	if webDir != "" {
 		webDir = expandHome(webDir)

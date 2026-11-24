@@ -3,6 +3,8 @@
 # Mac mini apps run:
 #   com.basecamp        `basecamp serve` on port 3050, restarted if it stops
 #   com.basecamp-scan   `basecamp scan` every hour (and at load) into ~/.basecamp/scan.json
+#   com.basecamp-jobs   `basecamp jobs` every 15 minutes (and at load) into ~/.basecamp/jobs.json,
+#                       with a macOS notification when a scheduled job turns red
 #
 # It builds the CLI and the dashboard from this checkout and copies them to
 # ~/.basecamp/app, so the service keeps running when a worktree is removed.
@@ -15,6 +17,8 @@ PORT=3050
 SERVE_LABEL=com.basecamp
 SCAN_LABEL=com.basecamp-scan
 SCAN_EVERY=3600
+JOBS_LABEL=com.basecamp-jobs
+JOBS_EVERY=900
 ROOT="${0:A:h:h}"
 DATA="$HOME/.basecamp"
 APP="$DATA/app"
@@ -41,9 +45,10 @@ start() {
 
 stop "$SERVE_LABEL"
 stop "$SCAN_LABEL"
+stop "$JOBS_LABEL"
 if [[ "${1:-}" == "--remove" ]]; then
-  rm -f "$AGENTS/$SERVE_LABEL.plist" "$AGENTS/$SCAN_LABEL.plist"
-  echo "Removed $SERVE_LABEL and $SCAN_LABEL (data left in $DATA)"
+  rm -f "$AGENTS/$SERVE_LABEL.plist" "$AGENTS/$SCAN_LABEL.plist" "$AGENTS/$JOBS_LABEL.plist"
+  echo "Removed $SERVE_LABEL, $SCAN_LABEL and $JOBS_LABEL (data left in $DATA)"
   exit 0
 fi
 
@@ -91,8 +96,12 @@ plist "$SERVE_LABEL" "\"$APP/basecamp\" serve -addr :$PORT -web \"$APP/web\" -da
   "  <key>KeepAlive</key><true/>"
 plist "$SCAN_LABEL" "\"$APP/basecamp\" scan -o \"$DATA/scan.json\"" \
   "  <key>StartInterval</key><integer>$SCAN_EVERY</integer>"
+plist "$JOBS_LABEL" "\"$APP/basecamp\" jobs -o \"$DATA/jobs.json\"" \
+  "  <key>StartInterval</key><integer>$JOBS_EVERY</integer>"
 
 start "$SCAN_LABEL"
+start "$JOBS_LABEL"
 start "$SERVE_LABEL"
 echo "Installed $SERVE_LABEL on port $PORT: http://$(hostname -s | tr '[:upper:]' '[:lower:]').taila545c3.ts.net:$PORT"
 echo "Installed $SCAN_LABEL: scans every $((SCAN_EVERY / 60)) min into $DATA/scan.json (logs in $LOGS)"
+echo "Installed $JOBS_LABEL: checks jobs every $((JOBS_EVERY / 60)) min into $DATA/jobs.json"
