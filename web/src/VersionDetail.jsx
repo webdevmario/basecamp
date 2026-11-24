@@ -125,6 +125,12 @@ export default function VersionDetail({ item, onClose }) {
               <span style={{ textAlign: 'center' }}>{isCurrent ? '' : 'Status'}</span>
             </div>
 
+            {rows.length === 0 && (
+              <div style={{ padding: '1.5rem 1rem', textAlign: 'center', color: 'var(--fg3)', fontSize: 'var(--text-sm)' }}>
+                No global packages in {isCurrent ? 'this version' : 'either version'}
+                {item.versionManager === 'nvm' ? ' (npm and corepack ship with Node, so they aren’t listed)' : ''}.
+              </div>
+            )}
             {rows.map((row, i) => (
               <div key={row.name} style={{
                 display: 'grid', gridTemplateColumns: '1fr 7rem 5.75rem',

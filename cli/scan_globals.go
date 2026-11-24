@@ -7,7 +7,7 @@ import (
 )
 
 func scanGlobalPackages() Category {
-	var items []Item
+	items := []Item{} // never null in JSON
 
 	// npm global packages
 	if commandExists("npm") {

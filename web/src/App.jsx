@@ -313,7 +313,9 @@ go build -o basecamp .
 
                 {filteredItems.length === 0 ? (
                   <div style={{ padding: '2.25rem', textAlign: 'center', color: 'var(--fg3)', fontSize: 'var(--text-base)' }}>
-                    {filterIssues ? 'No issues, looking good' : 'No items in this category'}
+                    {filterIssues ? 'No issues, looking good'
+                      : activeCat === 'globals' ? 'Nothing installed globally with npm (current Node), pip or cargo. npm and corepack ship with Node, so they aren’t listed.'
+                      : 'No items in this category'}
                   </div>
                 ) : filteredItems.map((item, i) => {
                   const hasVersions = item.versions?.length > 1;

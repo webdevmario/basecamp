@@ -54,6 +54,9 @@ Mac (paths, hostnames, keys, dotfile contents).
   http://localhost:3050 instead.
 - `-launchd` makes `basecamp jobs` skip `~/Documents` and iCloud Drive (privacy prompts would
   hang it); it finds snapshots from the paths the job's log names. Run it by hand to read folders.
+- Global Packages lists npm globals for the current (default) nvm Node only, plus pip (skipped for
+  Apple's `/usr/bin/pip3` and with pyenv) and cargo. npm and corepack are left out because they ship
+  with Node. An empty tab can be accurate: on 2026-11-24 the manual and launchd scans both found none.
 - Status values the UI understands: `active`, `current`, `running` (good), `outdated`, `stale`
   (count as issues and lower the score).
 
@@ -94,9 +97,6 @@ Springboard's plist); on 2026-11-24 it reported all 23 jobs fine.
    Optional; the nightly backups would benefit most.
 4. Not verified in a browser: the playbook's "Download .sh" button (the Claude app's pane blocks
    downloads).
-5. **Global Packages is empty** in the hourly scan (0 items on 2026-11-24, `globals` category), so
-   the version compare shows no packages for the current Node. Likely the launchd environment
-   (npm/pip/cargo not on PATH for `com.basecamp-scan`); compare with a scan run by hand.
 
 UI pass (2026-11-24, branch `claude/ui-pass-b919b3`): bigger rem-based sizing, phone layout, see
 UI conventions above.
