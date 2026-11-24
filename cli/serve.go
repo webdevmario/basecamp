@@ -64,6 +64,7 @@ func runServe(addr, webDir, dataDir string) {
 	})
 
 	registerNotesRoutes(mux, dataDir)
+	registerDotfilesRoutes(mux)
 	registerJobsRoutes(mux, dataDir)
 
 	if webDir != "" {
