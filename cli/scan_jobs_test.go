@@ -235,7 +235,7 @@ func TestLineTime(t *testing.T) {
 			t.Errorf("%q -> %v %v, want %s", line, got, ok, want)
 		}
 	}
-	if _, ok := lineTime("  ready: Minecraft, pick up by 2026-11-28 17:00", chicago); ok {
+	if _, ok := lineTime("  ready: a book, pick up by 2026-11-28 17:00", chicago); ok {
 		t.Error("a date mid-line is not a timestamp")
 	}
 }
@@ -247,7 +247,7 @@ func TestLastRunLinesAndMarkers(t *testing.T) {
 		"!! enrich failed (1)",
 		"=== done 06:12:00 ===",
 		"=== 2026-11-24 05:00:05 ===",
-		"Mateo: 10 out",
+		"card A: 10 out",
 		"!! libby check failed (2)",
 		"WARNING: slow answer from the library",
 		"=== done 06:36:49 ===",
