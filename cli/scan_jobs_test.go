@@ -294,6 +294,13 @@ func TestSnapshotsFromLog(t *testing.T) {
 	if hit.file != "stacks-20261124-033005-nightly.dump" || hit.src != "log" {
 		t.Errorf("got %+v", hit)
 	}
+	offsite := newestInLog([]string{
+		"2026-11-24T10:00:39.508Z Wrote /x/Offsite/offsite-20261124.dmg (300.0 MB)",
+		"2026-11-24T10:00:39.572Z Pruned: offsite-20261117.dmg",
+	}, regexp.MustCompile(`^offsite-\d{8}\.dmg$`), chicago)
+	if offsite.file != "offsite-20261124.dmg" || offsite.at.In(chicago).Hour() != 4 {
+		t.Errorf("a pruned older image must not win: %+v", offsite)
+	}
 	if got := snapshotName(SnapshotConfig{Pattern: `^diecast_scout-\d{8}-\d{6}-nightly\.dump$`}); got != "diecast_scout" {
 		t.Errorf("snapshotName = %q", got)
 	}

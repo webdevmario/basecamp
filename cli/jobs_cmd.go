@@ -31,6 +31,7 @@ func runJobs(args []string) {
 	cfgPath := fsFlags.String("config", "~/.basecamp/jobs-config.json", "Per-job settings (log globs, backup snapshots, offsite job)")
 	statePath := fsFlags.String("state", "~/.basecamp/jobs-state.json", "State kept between runs")
 	notify := fsFlags.Bool("notify", true, "Send a macOS notification when a job turns red (once per failure)")
+	background := fsFlags.Bool("launchd", false, "Running from launchd: skip privacy-protected folders (~/Documents, iCloud Drive), read logs instead")
 	fsFlags.Usage = func() {
 		fmt.Fprintln(os.Stderr, "Usage: basecamp jobs [flags]")
 		fmt.Fprintln(os.Stderr, "Checks every user LaunchAgent and the backups it makes, writes jobs.json, and notifies")
@@ -45,6 +46,7 @@ func runJobs(args []string) {
 		os.Exit(1)
 	}
 	env := defaultJobsEnv(cfg)
+	env.SkipProtected = *background
 	state := loadJobsState(expandHome(*statePath))
 	env.Observed = observeRuns(&state, env)
 

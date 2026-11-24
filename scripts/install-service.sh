@@ -96,7 +96,7 @@ plist "$SERVE_LABEL" "\"$APP/basecamp\" serve -addr :$PORT -web \"$APP/web\" -da
   "  <key>KeepAlive</key><true/>"
 plist "$SCAN_LABEL" "\"$APP/basecamp\" scan -o \"$DATA/scan.json\"" \
   "  <key>StartInterval</key><integer>$SCAN_EVERY</integer>"
-plist "$JOBS_LABEL" "\"$APP/basecamp\" jobs -o \"$DATA/jobs.json\"" \
+plist "$JOBS_LABEL" "\"$APP/basecamp\" jobs -launchd -o \"$DATA/jobs.json\"" \
   "  <key>StartInterval</key><integer>$JOBS_EVERY</integer>"
 
 start "$SCAN_LABEL"

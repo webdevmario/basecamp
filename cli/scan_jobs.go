@@ -659,28 +659,62 @@ func newestInDir(dir string, re *regexp.Regexp) (snapHit, error) {
 // readable (launchd jobs can't read ~/Documents) or the job only reports paths in its log.
 func newestInLog(lines []string, re *regexp.Regexp, loc *time.Location) snapHit {
 	var best snapHit
+	var bestKey time.Time
 	for _, l := range lines {
 		for _, tok := range strings.Fields(l) {
 			name := filepath.Base(strings.Trim(tok, `"'(),`))
 			if !re.MatchString(name) {
 				continue
 			}
-			at, ok := lineTime(l, loc)
-			if !ok {
-				if m := fileDateRe.FindString(name); m != "" {
-					at, _ = time.ParseInLocation("20060102", m, loc)
-				}
+			// Order by the date in the file name when there is one: a later line can name an older
+			// file ("Pruned: offsite-20261117.dmg"). The line's own time is kept when it agrees.
+			var named time.Time
+			if m := fileDateRe.FindString(name); m != "" {
+				named, _ = time.ParseInLocation("20060102", m, loc)
 			}
-			if !at.IsZero() && !at.Before(best.at) {
-				best = snapHit{file: name, at: at, src: "log"}
+			at, ok := lineTime(l, loc)
+			if !named.IsZero() && (!ok || at.Sub(named) < 0 || at.Sub(named) > 48*time.Hour) {
+				at = named
+			}
+			if at.IsZero() {
+				continue
+			}
+			key := at
+			if !named.IsZero() {
+				key = named
+			}
+			if best.file == "" || !key.Before(bestKey) {
+				best, bestKey = snapHit{file: name, at: at, src: "log"}, key
 			}
 		}
 	}
 	return best
 }
 
-func findSnapshot(dir string, re *regexp.Regexp, logLines []string, loc *time.Location) (snapHit, error) {
-	hit, dirErr := newestInDir(expandHome(dir), re)
+var errProtected = errors.New("not read from launchd")
+
+// protectedDir: folders macOS privacy controls guard (TCC). A launchd job touching them gets a
+// permission error or a prompt nobody is there to answer, so background runs skip them.
+func protectedDir(dir string) bool {
+	home, _ := os.UserHomeDir()
+	dir = expandHome(dir)
+	for _, d := range []string{"Documents", "Desktop", "Downloads", "Pictures", "Movies", "Music", "Library/Mobile Documents"} {
+		p := filepath.Join(home, d)
+		if dir == p || strings.HasPrefix(dir, p+"/") {
+			return true
+		}
+	}
+	return false
+}
+
+func findSnapshot(dir string, re *regexp.Regexp, logLines []string, loc *time.Location, skipProtected bool) (snapHit, error) {
+	var hit snapHit
+	var dirErr error
+	if skipProtected && protectedDir(dir) {
+		dirErr = errProtected
+	} else {
+		hit, dirErr = newestInDir(expandHome(dir), re)
+	}
 	if fromLog := newestInLog(logLines, re, loc); fromLog.at.After(hit.at) {
 		hit = fromLog
 	}
@@ -691,6 +725,9 @@ func findSnapshot(dir string, re *regexp.Regexp, logLines []string, loc *time.Lo
 }
 
 func describeReadError(err error) string {
+	if errors.Is(err, errProtected) {
+		return "no snapshot named in the log (the folder is privacy-protected, so the 15-minute check only reads logs)"
+	}
 	if errors.Is(err, fs.ErrPermission) {
 		return "no permission to read the folder (background jobs can't read ~/Documents without Full Disk Access)"
 	}
@@ -845,6 +882,8 @@ type jobsEnv struct {
 	Observed   map[string]time.Time // label -> when basecamp saw launchd's run count go up
 	ReadPlist  func(path string) ([]byte, error)
 	OffsiteSrc string // text of the offsite script
+	// SkipProtected: running from launchd, so don't open ~/Documents, iCloud Drive and the like.
+	SkipProtected bool
 }
 
 func defaultJobsEnv(cfg JobsConfig) jobsEnv {
@@ -893,7 +932,7 @@ func parseAnyTime(s string, loc *time.Location) time.Time {
 	if s == "" {
 		return time.Time{}
 	}
-	for _, layout := range []string{time.RFC3339Nano, time.RFC3339, "2006-01-02T15:04:05", "2006-01-02 15:04:05"} {
+	for _, layout := range []string{time.RFC3339Nano, time.RFC3339, "2006-01-02T15:04:05-0700", "2006-01-02T15:04:05", "2006-01-02 15:04:05"} {
 		if t, err := time.ParseInLocation(layout, s, loc); err == nil {
 			return t
 		}
@@ -1054,7 +1093,7 @@ func buildJobsReport(env jobsEnv) JobsReport {
 		j := &p.job
 		jc := env.Config.Jobs[j.Label]
 		logPaths := append([]string{}, j.Logs...)
-		if jc.Log != "" {
+		if jc.Log != "" && !(env.SkipProtected && protectedDir(filepath.Dir(jc.Log))) {
 			if g := newestGlob(jc.Log); g != "" {
 				logPaths = append([]string{g}, logPaths...)
 				j.Logs = append([]string{g}, j.Logs...)
@@ -1175,7 +1214,7 @@ func buildJobsReport(env jobsEnv) JobsReport {
 			oc := env.Config.Offsite
 			re, err := regexp.Compile(oc.Pattern)
 			if err == nil {
-				hit, herr := findSnapshot(oc.Dir, re, allLines, env.Loc)
+				hit, herr := findSnapshot(oc.Dir, re, allLines, env.Loc, env.SkipProtected)
 				offsiteImage = hit
 				rep.Offsite.Image, rep.Offsite.At, rep.Offsite.Source = hit.file, fmtTime(hit.at), hit.src
 				snap := Snapshot{Name: "offsite image", File: hit.file, At: fmtTime(hit.at), Source: hit.src}
@@ -1197,7 +1236,7 @@ func buildJobsReport(env jobsEnv) JobsReport {
 				continue
 			}
 			name := snapshotName(sc)
-			hit, herr := findSnapshot(sc.Dir, re, allLines, env.Loc)
+			hit, herr := findSnapshot(sc.Dir, re, allLines, env.Loc, env.SkipProtected)
 			snap := Snapshot{Name: name, File: hit.file, At: fmtTime(hit.at), Source: hit.src}
 			if hit.file == "" {
 				snap.Error = describeReadError(herr) + ": " + sc.Dir
