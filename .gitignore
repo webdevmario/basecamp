@@ -9,3 +9,8 @@ scan.json
 *.scan.json
 
 .DS_Store
+
+# Jobs reports and their local config/state, same reason
+jobs.json
+jobs-state.json
+jobs-config.json

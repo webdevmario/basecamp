@@ -11,6 +11,7 @@ export default defineConfig({
     port: 5173,
     proxy: {
       '/scan.json': api,
+      '/jobs.json': api,
       '/api': api,
     },
   },

@@ -16,6 +16,7 @@ func usage() {
 	fmt.Fprintln(os.Stderr, "  scan    Scan the current environment (-o file, -pretty)")
 	fmt.Fprintln(os.Stderr, "  serve   Serve the dashboard and the latest scan (-addr, -web, -data)")
 	fmt.Fprintln(os.Stderr, "  dotfiles  Keep configs saved in a private repo (status, diff, save, restore)")
+	fmt.Fprintln(os.Stderr, "  jobs    Check scheduled jobs (LaunchAgents) and backups into ~/.basecamp/jobs.json (-h for flags)")
 }
 
 func main() {
@@ -47,6 +48,8 @@ func main() {
 		runServe(*addr, *web, *data)
 	case "dotfiles":
 		runDotfiles(args[1:])
+	case "jobs":
+		runJobs(args[1:])
 	default:
 		fmt.Fprintf(os.Stderr, "Unknown command: %s\n", args[0])
 		os.Exit(1)

@@ -6,6 +6,7 @@ import { useNotes, getNote, setNote } from './notes';
 import NoteModal from './NoteModal';
 import VersionDetail from './VersionDetail';
 import ConfigsView from './ConfigsView';
+import JobsView, { useJobs, JobsNavButton } from './JobsView';
 
 // Fallback data for when no scan.json exists yet
 const EMPTY_DATA = {
@@ -25,6 +26,13 @@ export default function App() {
   const [modalItem, setModalItem] = useState(null);
   const [versionItem, setVersionItem] = useState(null);
   const [notes, setNotes] = useNotes();
+  const [showJobs, setShowJobs] = useState(() => window.location.hash === '#jobs');
+  const jobs = useJobs();
+  useEffect(() => {
+    const onHash = () => setShowJobs(window.location.hash === '#jobs');
+    window.addEventListener('hashchange', onHash);
+    return () => window.removeEventListener('hashchange', onHash);
+  }, []);
 
   // Load scan data
   useEffect(() => {
@@ -126,16 +134,17 @@ export default function App() {
         </div>
 
         <div style={{ flex: 1, overflow: 'auto', padding: '8px 6px' }}>
+          <JobsNavButton jobs={jobs} active={showJobs} onClick={() => { setShowJobs(true); setShowPlaybook(false); history.replaceState(null, '', '#jobs'); }} />
           {data.categories.map(c => {
             const h = healthMap[c.id];
-            const isActive = activeCat === c.id && !showPlaybook;
+            const isActive = activeCat === c.id && !showPlaybook && !showJobs;
             const isHov = hoveredNav === c.id;
             const issues = h ? h.stale + h.outdated : 0;
             return (
               <button key={c.id}
                 onMouseEnter={() => setHoveredNav(c.id)}
                 onMouseLeave={() => setHoveredNav(null)}
-                onClick={() => { setActiveCat(c.id); setShowPlaybook(false); setFilterIssues(false); }}
+                onClick={() => { setActiveCat(c.id); setShowPlaybook(false); setShowJobs(false); setFilterIssues(false); history.replaceState(null, '', ' '); }}
                 style={{
                   display: 'flex', alignItems: 'center', gap: 9, width: '100%',
                   padding: '8px 10px', borderRadius: 7, border: 'none', cursor: 'pointer',
@@ -157,12 +166,12 @@ export default function App() {
               </button>
             );
           })}
-          <button onClick={() => { setActiveCat('configs'); setShowPlaybook(false); }} style={{
+          <button onClick={() => { setActiveCat('configs'); setShowPlaybook(false); setShowJobs(false); history.replaceState(null, '', ' '); }} style={{
             display: 'flex', alignItems: 'center', gap: 9, width: '100%', padding: '8px 10px', borderRadius: 7,
             border: 'none', cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit', fontSize: 13, marginTop: 6,
-            background: activeCat === 'configs' && !showPlaybook ? 'var(--accent-bg)' : 'transparent',
-            color: activeCat === 'configs' && !showPlaybook ? 'var(--accent)' : 'var(--fg2)',
-            fontWeight: activeCat === 'configs' && !showPlaybook ? 600 : 400,
+            background: activeCat === 'configs' && !showPlaybook && !showJobs ? 'var(--accent-bg)' : 'transparent',
+            color: activeCat === 'configs' && !showPlaybook && !showJobs ? 'var(--accent)' : 'var(--fg2)',
+            fontWeight: activeCat === 'configs' && !showPlaybook && !showJobs ? 600 : 400,
           }}>
             <span style={{ fontSize: 14, width: 20, textAlign: 'center' }}>🗂</span>
             <span style={{ flex: 1 }}>Configs</span>
@@ -182,7 +191,7 @@ export default function App() {
           }}>
             {scanning ? '⟳ Scanning…' : '↻ Run Scan'}
           </button>
-          <button onClick={() => setShowPlaybook(!showPlaybook)} style={{
+          <button onClick={() => { setShowPlaybook(!showPlaybook); setShowJobs(false); }} style={{
             width: '100%', padding: '9px 0', borderRadius: 7,
             border: showPlaybook ? 'none' : '1px solid var(--border2)',
             background: showPlaybook ? 'var(--accent)' : 'transparent',
@@ -196,7 +205,9 @@ export default function App() {
 
       {/* Content */}
       <div style={{ flex: 1, overflow: 'auto' }}>
-        {error && !data.categories.length ? (
+        {showJobs ? (
+          <JobsView jobs={jobs} />
+        ) : error && !data.categories.length ? (
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
             <div style={{ textAlign: 'center', maxWidth: 400, padding: 32 }}>
               <div style={{ fontSize: 40, marginBottom: 16 }}>▲</div>

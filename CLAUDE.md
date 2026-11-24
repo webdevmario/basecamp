@@ -11,10 +11,12 @@ Mac (paths, hostnames, keys, dotfile contents).
 
 - `cli/`: Go, no dependencies. `main.go` (commands), `scan_*.go` (one scanner per category, each
   returns a `Category`), `types.go` (JSON shape), `helpers.go` (`run`, `runLines`, file helpers),
-  `serve.go` (HTTP server).
+  `serve.go` (HTTP server). Jobs: `scan_jobs.go` (plists, launchctl, logs, snapshots, status
+  rules), `jobs_cmd.go` (`basecamp jobs`, notify-once state), `jobs_http.go` (routes).
 - `web/`: React 19 + Vite. `App.jsx` (everything on screen), `health.js` (scores and observations),
   `playbook.js` (bash setup script), `notes.js` (per-item notes, saved through `/api/notes`),
-  `VersionDetail.jsx` (nvm/pyenv versions compared), `NoteModal.jsx`.
+  `VersionDetail.jsx` (nvm/pyenv versions compared), `NoteModal.jsx`, `JobsView.jsx` (Jobs tab).
+- `docs/jobs.md`: how job status is decided, the status file convention, `jobs-config.json`.
 - `scripts/install-service.sh`: builds and installs the launchd jobs.
 
 ## Running
@@ -23,6 +25,10 @@ Mac (paths, hostnames, keys, dotfile contents).
 - launchd `com.basecamp`: `basecamp serve` on :3050, KeepAlive. Serves `~/.basecamp/app/web`,
   `GET /scan.json` from `~/.basecamp/scan.json`, `POST /api/scan` (rescan now), `GET /api/health`.
 - launchd `com.basecamp-scan`: `basecamp scan -o ~/.basecamp/scan.json` at load and every hour.
+- launchd `com.basecamp-jobs`: `basecamp jobs -launchd` at load and every 15 min into
+  `~/.basecamp/jobs.json`; one macOS notification per new failure (state in `jobs-state.json`).
+  Backup folders and the offsite job are configured in `~/.basecamp/jobs-config.json` (local only).
+  `GET /jobs.json` feeds the Jobs tab (`/#jobs`); `GET /api/jobs/status` feeds Springboard's Jobs tile.
 - Logs: `~/.basecamp/logs/<label>.log`.
 - Tailnet only: `tailnetOnly()` in `serve.go` answers 100.64.0.0/10, fd7a:115c:a1e0::/48 and loopback;
   anything else (home LAN) gets 403. Keep it: config diffs will be served here. Never use Funnel.
@@ -45,6 +51,8 @@ Mac (paths, hostnames, keys, dotfile contents).
   copy buttons need the textarea fallback (see `PlaybookActions` in `components.jsx`).
 - The Claude app's browser pane blocks scripts from the tailnet host; preview at
   http://localhost:3050 instead.
+- `-launchd` makes `basecamp jobs` skip `~/Documents` and iCloud Drive (privacy prompts would
+  hang it); it finds snapshots from the paths the job's log names. Run it by hand to read folders.
 - Status values the UI understands: `active`, `current`, `running` (good), `outdated`, `stale`
   (count as issues and lower the score).
 
@@ -55,11 +63,18 @@ Mac (paths, hostnames, keys, dotfile contents).
    `web/public/scan.json` and `cli/basecamp`, which #2 deletes. Public history: Mario decided on
    2026-11-24 to leave the old scan and binary in history (no secrets in them).
 2. **`basecamp diff`** is not built (the old README called it "coming soon").
-3. **Parallel branches:** a Jobs view (`basecamp-jobs`) and config tracking (`basecamp-dotfiles`)
-   build on `basecamp serve`. Each registers its routes with one line in `runServe`.
+3. **Parallel branches:** config tracking (`basecamp-dotfiles`) builds on `basecamp serve` and
+   registers its routes with one line in `runServe`. The Jobs view (PR #3) is stacked on PR #2 and
+   is what is deployed on the mini now; redeploying from a branch without it removes the jobs
+   routes and breaks `com.basecamp-jobs`.
 4. **Cleanup the scan points at** (Mario's machine, not code): Node 15/16/18/20/23 under nvm are
    end-of-life, 22 brew packages outdated, mongodb-community installed but not running, a leftover
    "VPN by Google One" launch agent, Remote WSL and three Docker extensions in VS Code, a
    5.4-year-old SSH key.
-5. Not verified in a browser: the playbook's "Download .sh" button (the Claude app's pane blocks
+5. **What the first jobs scan found** (other projects, not this repo): borrowd has no
+   `backups/` folder yet so `local.borrowd.nightly` is red until its backup step lands;
+   diecast-scout dumps aren't in the offsite image; stacks-backup, borrowd, rankd, stacks and
+   tatertot log to `/tmp`; `com.springboard.plist` has an unescaped `&&`; no job writes a status
+   file yet (docs/jobs.md shows how).
+6. Not verified in a browser: the playbook's "Download .sh" button (the Claude app's pane blocks
    downloads). Copy, notes, Run Scan and the version compare were checked on 2026-11-24.
