@@ -1317,6 +1317,13 @@ func buildJobsReport(env jobsEnv) JobsReport {
 		if j.Reasons == nil {
 			j.Reasons = []string{}
 		}
+		if j.Status == "warning" && len(j.Reasons) == 0 {
+			for _, n := range j.Notes {
+				if n.Level == "warn" {
+					j.Reasons = append(j.Reasons, n.Text)
+				}
+			}
+		}
 		j.Red = redStatuses[j.Status]
 		rep.Summary.Total++
 		rep.Summary.ByStatus[j.Status]++
