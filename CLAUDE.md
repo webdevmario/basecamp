@@ -24,6 +24,9 @@ Mac (paths, hostnames, keys, dotfile contents).
   `GET /scan.json` from `~/.basecamp/scan.json`, `POST /api/scan` (rescan now), `GET /api/health`.
 - launchd `com.basecamp-scan`: `basecamp scan -o ~/.basecamp/scan.json` at load and every hour.
 - Logs: `~/.basecamp/logs/<label>.log`.
+- Tailnet only: `tailnetOnly()` in `serve.go` answers 100.64.0.0/10, fd7a:115c:a1e0::/48 and loopback;
+  anything else (home LAN) gets 403. Keep it: config diffs will be served here. Never use Funnel.
+- New API areas plug in as `registerXRoutes(mux, ...)` in their own `cli/*_http.go`, one line in `runServe`.
 - Deploy: `scripts/install-service.sh` from any checkout. It builds the CLI and `web/dist`, copies
   them to `~/.basecamp/app` (so removing a worktree never breaks the service) and reloads both jobs.
   `--remove` uninstalls and keeps `~/.basecamp`.
