@@ -1,0 +1,11 @@
+# Built output
+cli/basecamp
+cli/cli
+web/dist/
+web/node_modules/
+
+# Scans describe this Mac and the repo is public: they live in ~/.basecamp, never here
+scan.json
+*.scan.json
+
+.DS_Store

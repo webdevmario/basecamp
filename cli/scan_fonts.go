@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 )
 
@@ -104,23 +105,43 @@ type fontFamily struct {
 	source   string
 }
 
+// fontStyle matches a style suffix, alone or run together: "Bold", "SemiBoldItalic", "Retina".
+var fontStyle = regexp.MustCompile(`(?i)^(thin|hairline|extra|ultra|semi|demi|light|regular|book|medium|bold|black|heavy|italic|oblique|retina)+$`)
+
+// fontStyleAbbrev matches the short forms some families use after a space ("Anonymous Pro BI").
+var fontStyleAbbrev = regexp.MustCompile(`^(B|I|BI|R)$`)
+
+var fontAxes = regexp.MustCompile(`\[[^\]]*\]`) // variable font axes, "[wght]"
+
+// extractFontFamily turns a font file name into its family:
+// "JetBrainsMono-ExtraBoldItalic.ttf" and "JetBrainsMono-Italic[wght].ttf" are "JetBrainsMono",
+// "FuraMono-Bold Powerline.otf" is "FuraMono Powerline", "Anonymous Pro BI.ttf" is "Anonymous Pro".
 func extractFontFamily(filename string) string {
-	// Remove extension
 	name := strings.TrimSuffix(filename, filepath.Ext(filename))
+	name = strings.TrimSpace(fontAxes.ReplaceAllString(name, ""))
 
-	// Common suffixes to strip
-	suffixes := []string{
-		"-Regular", "-Bold", "-Italic", "-Light", "-Medium", "-Thin",
-		"-SemiBold", "-ExtraBold", "-ExtraLight", "-Black",
-		"-BoldItalic", "-LightItalic", "-MediumItalic",
-		" Regular", " Bold", " Italic", " Light", " Medium",
+	if i := strings.LastIndex(name, "-"); i > 0 {
+		base, kept := name[:i], []string{}
+		for _, w := range strings.Fields(name[i+1:]) {
+			if !fontStyle.MatchString(w) {
+				kept = append(kept, w)
+			}
+		}
+		if len(kept) > 0 {
+			base += " " + strings.Join(kept, " ")
+		}
+		return base
 	}
 
-	for _, s := range suffixes {
-		name = strings.TrimSuffix(name, s)
+	words := strings.Fields(name)
+	for len(words) > 1 {
+		last := words[len(words)-1]
+		if !fontStyle.MatchString(last) && !fontStyleAbbrev.MatchString(last) {
+			break
+		}
+		words = words[:len(words)-1]
 	}
-
-	return name
+	return strings.Join(words, " ")
 }
 
 func isDevFont(name string) bool {

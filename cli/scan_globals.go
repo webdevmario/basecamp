@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os/exec"
 	"strings"
 )
 
@@ -10,23 +11,18 @@ func scanGlobalPackages() Category {
 
 	// npm global packages
 	if commandExists("npm") {
-		npmGlobals := run("npm", "list", "-g", "--depth=0", "--json")
-		if npmGlobals != "" {
-			// Parse JSON to get package names and versions
-			// Quick parse without full json unmarshal
-			lines := runLines("npm", "list", "-g", "--depth=0", "--parseable", "--long")
+		// Format: /path/to/node_modules/pkg:pkg@version. The first line is the
+		// global prefix itself (".../lib:lib@"), which isn't a package.
+		lines := runLines("npm", "list", "-g", "--depth=0", "--parseable", "--long")
+		if len(lines) > 0 {
 			for _, line := range lines {
-				// Format: /path/to/node_modules/pkg:pkg@version
-				if !strings.Contains(line, ":") {
-					continue
-				}
 				parts := strings.SplitN(line, ":", 2)
-				if len(parts) < 2 {
+				if len(parts) < 2 || !strings.Contains(parts[0], "node_modules") {
 					continue
 				}
 				pkgInfo := parts[1]
 				atIdx := strings.LastIndex(pkgInfo, "@")
-				if atIdx <= 0 {
+				if atIdx <= 0 || atIdx == len(pkgInfo)-1 {
 					continue
 				}
 				name := pkgInfo[:atIdx]
@@ -56,8 +52,10 @@ func scanGlobalPackages() Category {
 		}
 	}
 
-	// pip3 global packages (only if not using pyenv — avoid double-counting)
-	if commandExists("pip3") && !commandExists("pyenv") {
+	// pip3 global packages. Skipped with pyenv (counted under Runtimes) and for Apple's
+	// /usr/bin/pip3, whose packages ship with the Command Line Tools rather than being yours.
+	pip3, _ := exec.LookPath("pip3")
+	if pip3 != "" && pip3 != "/usr/bin/pip3" && !commandExists("pyenv") {
 		lines := runLines("pip3", "list", "--format=freeze")
 		for _, line := range lines {
 			line = strings.TrimSpace(line)
@@ -114,13 +112,13 @@ func scanGlobalPackages() Category {
 
 func checkDeprecatedNPM(name string) string {
 	deprecated := map[string]string{
-		"create-react-app": "Deprecated upstream — use Vite or Next.js",
+		"create-react-app": "Deprecated upstream; use Vite or Next.js",
 		"nodemon":          "tsx --watch or node --watch provides equivalent functionality",
-		"tslint":           "Deprecated — use ESLint with typescript-eslint",
-		"bower":            "Deprecated — use npm/yarn/pnpm directly",
+		"tslint":           "Deprecated; use ESLint with typescript-eslint",
+		"bower":            "Deprecated; use npm/yarn/pnpm directly",
 		"gulp":             "Consider modern alternatives like npm scripts or Vite",
-		"grunt":            "Deprecated — consider npm scripts or modern bundlers",
-		"request":          "Deprecated — use node-fetch, undici, or axios",
+		"grunt":            "Deprecated; consider npm scripts or modern bundlers",
+		"request":          "Deprecated; use node-fetch, undici, or axios",
 	}
 	if note, ok := deprecated[name]; ok {
 		return note

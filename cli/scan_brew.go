@@ -6,22 +6,6 @@ import (
 	"strings"
 )
 
-type brewInfoEntry struct {
-	Name     string `json:"name"`
-	FullName string `json:"full_name"`
-	Versions struct {
-		Stable string `json:"stable"`
-	} `json:"versions"`
-	Desc string `json:"desc"`
-}
-
-type brewCaskEntry struct {
-	Token   string `json:"token"`
-	Name    []string `json:"name"`
-	Version string `json:"version"`
-	Desc    string `json:"desc"`
-}
-
 func scanHomebrew() Category {
 	if !commandExists("brew") {
 		return Category{
@@ -169,11 +153,4 @@ func enrichBrewDescriptions(items []Item) {
 			items[i].SystemNote = desc
 		}
 	}
-}
-
-// Helper to check if brew JSON parsing is available
-func _unusedBrewJSON() {
-	_ = json.Unmarshal
-	_ = brewInfoEntry{}
-	_ = brewCaskEntry{}
 }

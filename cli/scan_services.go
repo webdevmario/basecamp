@@ -31,7 +31,7 @@ func scanServices() Category {
 
 			systemNote := "Brew service"
 			if rawStatus == "started" {
-				systemNote = "Brew service — auto-starts on boot"
+				systemNote = "Brew service, starts at boot"
 			}
 
 			// Try to find port

@@ -9,25 +9,25 @@ type defaultCheck struct {
 	name   string
 	domain string
 	key    string
-	cmd    string // the command to set this value
+	kind   string // bool, int, float, string: the type `defaults write` needs
 }
 
 func scanMacOSDefaults() Category {
 	checks := []defaultCheck{
-		{"Dock auto-hide", "com.apple.dock", "autohide", "defaults write com.apple.dock autohide -bool true"},
-		{"Dock size", "com.apple.dock", "tilesize", "defaults write com.apple.dock tilesize -integer %s"},
-		{"Dock magnification", "com.apple.dock", "magnification", "defaults write com.apple.dock magnification -bool true"},
-		{"Show hidden files", "com.apple.finder", "AppleShowAllFiles", "defaults write com.apple.finder AppleShowAllFiles -bool true"},
-		{"Show file extensions", "NSGlobalDomain", "AppleShowAllExtensions", "defaults write NSGlobalDomain AppleShowAllExtensions -bool true"},
-		{"Show path bar", "com.apple.finder", "ShowPathbar", "defaults write com.apple.finder ShowPathbar -bool true"},
-		{"Screenshots location", "com.apple.screencapture", "location", "defaults write com.apple.screencapture location %s"},
-		{"Screenshot format", "com.apple.screencapture", "type", "defaults write com.apple.screencapture type %s"},
-		{"Key repeat rate", "NSGlobalDomain", "KeyRepeat", "defaults write NSGlobalDomain KeyRepeat -int %s"},
-		{"Initial key repeat", "NSGlobalDomain", "InitialKeyRepeat", "defaults write NSGlobalDomain InitialKeyRepeat -int %s"},
-		{"Tap to click", "com.apple.AppleMultitouchTrackpad", "Clicking", "defaults write com.apple.AppleMultitouchTrackpad Clicking -bool true"},
-		{"Scroll direction natural", "NSGlobalDomain", "com.apple.swipescrolldirection", "defaults write NSGlobalDomain com.apple.swipescrolldirection -bool true"},
-		{"Reduce motion", "com.apple.universalaccess", "reduceMotion", "defaults write com.apple.universalaccess reduceMotion -bool true"},
-		{"Dark mode", "NSGlobalDomain", "AppleInterfaceStyle", ""},
+		{"Dock auto-hide", "com.apple.dock", "autohide", "bool"},
+		{"Dock size", "com.apple.dock", "tilesize", "int"},
+		{"Dock magnification", "com.apple.dock", "magnification", "bool"},
+		{"Show hidden files", "com.apple.finder", "AppleShowAllFiles", "bool"},
+		{"Show file extensions", "NSGlobalDomain", "AppleShowAllExtensions", "bool"},
+		{"Show path bar", "com.apple.finder", "ShowPathbar", "bool"},
+		{"Screenshots location", "com.apple.screencapture", "location", "string"},
+		{"Screenshot format", "com.apple.screencapture", "type", "string"},
+		{"Key repeat rate", "NSGlobalDomain", "KeyRepeat", "int"},
+		{"Initial key repeat", "NSGlobalDomain", "InitialKeyRepeat", "int"},
+		{"Tap to click", "com.apple.AppleMultitouchTrackpad", "Clicking", "bool"},
+		{"Scroll direction natural", "NSGlobalDomain", "com.apple.swipescrolldirection", "bool"},
+		{"Reduce motion", "com.apple.universalaccess", "reduceMotion", "bool"},
+		{"Dark mode", "NSGlobalDomain", "AppleInterfaceStyle", "string"},
 	}
 
 	var items []Item
@@ -38,15 +38,22 @@ func scanMacOSDefaults() Category {
 			continue // Not set or default
 		}
 
-		// Format the command with the actual value
-		cmd := check.cmd
-		if strings.Contains(cmd, "%s") {
-			cmd = fmt.Sprintf(cmd, value)
+		// The playbook replays these, so the command must write back the value read here.
+		arg := value
+		detail := value
+		switch check.kind {
+		case "bool":
+			on := value == "1" || strings.EqualFold(value, "true")
+			arg = fmt.Sprint(on)
+			detail = map[bool]string{true: "on", false: "off"}[on]
+		case "string":
+			arg = shellQuote(value)
 		}
+		cmd := fmt.Sprintf("defaults write %s %s -%s %s", check.domain, check.key, check.kind, arg)
 
 		items = append(items, Item{
 			Name:       check.name,
-			Detail:     value,
+			Detail:     detail,
 			Status:     "active",
 			SystemNote: cmd,
 		})
@@ -59,4 +66,12 @@ func scanMacOSDefaults() Category {
 		Desc:  "System defaults and customizations",
 		Items: items,
 	}
+}
+
+// shellQuote single-quotes a value for a bash command line when it needs it.
+func shellQuote(s string) string {
+	if s != "" && !strings.ContainsAny(s, " \t\n'\"\\$`!*?[](){}<>|&;#~") {
+		return s
+	}
+	return "'" + strings.ReplaceAll(s, "'", `'\''`) + "'"
 }

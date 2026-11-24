@@ -3,28 +3,24 @@ package main
 import (
 	"fmt"
 	"os"
+	"strings"
 	"time"
 )
 
 func scanMeta() Meta {
-	hostname, _ := os.Hostname()
+	// "Shady-Mac-mini", not the DHCP-flavored "Shady-Mac-mini.attlocal.net"
+	hostname := run("scutil", "--get", "LocalHostName")
+	if hostname == "" {
+		hostname, _ = os.Hostname()
+		hostname, _, _ = strings.Cut(hostname, ".")
+	}
 
 	osVersion := run("sw_vers", "-productVersion")
 	osBuild := run("sw_vers", "-buildVersion")
-	osName := "macOS"
-	// Map version to name
-	if len(osVersion) >= 2 {
-		major := osVersion[:2]
-		switch major {
-		case "15":
-			osName = "macOS Sequoia"
-		case "14":
-			osName = "macOS Sonoma"
-		case "13":
-			osName = "macOS Ventura"
-		case "12":
-			osName = "macOS Monterey"
-		}
+	major, _, _ := strings.Cut(osVersion, ".")
+	osName := "macOS " + major
+	if name, ok := macOSNames[major]; ok {
+		osName = "macOS " + name
 	}
 
 	chip := run("sysctl", "-n", "machdep.cpu.brand_string")
@@ -63,4 +59,13 @@ func scanMeta() Meta {
 		Shell:     shell,
 		LastScan:  time.Now().UTC().Format(time.RFC3339),
 	}
+}
+
+// macOSNames maps major versions to marketing names. Unknown versions show as "macOS 27".
+var macOSNames = map[string]string{
+	"26": "Tahoe",
+	"15": "Sequoia",
+	"14": "Sonoma",
+	"13": "Ventura",
+	"12": "Monterey",
 }

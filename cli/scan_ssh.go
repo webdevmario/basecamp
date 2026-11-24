@@ -25,7 +25,7 @@ func scanSSHKeys() Category {
 	for _, entry := range entries {
 		name := entry.Name()
 		// Look for private key files (no extension, or specific patterns)
-		if strings.HasSuffix(name, ".pub") || name == "config" || name == "known_hosts" ||
+		if strings.HasSuffix(name, ".pub") || name == "config" || strings.HasPrefix(name, "known_hosts") ||
 			name == "authorized_keys" || strings.HasPrefix(name, ".") {
 			continue
 		}
@@ -39,6 +39,11 @@ func scanSSHKeys() Category {
 		// Read first line to detect key type
 		lines := readFileLines(fullPath)
 		if len(lines) == 0 {
+			continue
+		}
+
+		// Only private keys: everything else in ~/.ssh (backups, notes) is skipped.
+		if !strings.Contains(lines[0], "PRIVATE KEY") {
 			continue
 		}
 
@@ -62,11 +67,11 @@ func scanSSHKeys() Category {
 		case strings.Contains(firstLine, "RSA PRIVATE KEY"):
 			keyType = "RSA"
 			status = "stale"
-			systemNote = "Legacy RSA key format — ed25519 is preferred"
+			systemNote = "Legacy RSA key format; ed25519 is preferred"
 		case strings.Contains(firstLine, "DSA PRIVATE KEY"):
 			keyType = "DSA"
 			status = "stale"
-			systemNote = "DSA is deprecated — migrate to ed25519"
+			systemNote = "DSA is deprecated; migrate to ed25519"
 		}
 
 		age := daysSince(info.ModTime())
@@ -80,7 +85,7 @@ func scanSSHKeys() Category {
 		}
 
 		if age > 365*3 && status == "active" {
-			systemNote = fmt.Sprintf("%s — consider rotating", ageStr)
+			systemNote = fmt.Sprintf("%s, consider rotating", ageStr)
 		}
 
 		displayName := fmt.Sprintf("SSH key (%s)", keyType)

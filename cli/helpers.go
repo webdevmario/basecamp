@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -8,9 +9,16 @@ import (
 	"time"
 )
 
-// run executes a command and returns trimmed stdout, or empty string on error
+// commandTimeout caps every command the scanner runs, so one hung tool (a permission
+// prompt, a slow network call) can't stall the whole scan.
+const commandTimeout = 60 * time.Second
+
+// run executes a command and returns trimmed stdout, or empty string on error or timeout
 func run(name string, args ...string) string {
-	cmd := exec.Command(name, args...)
+	ctx, cancel := context.WithTimeout(context.Background(), commandTimeout)
+	defer cancel()
+	cmd := exec.CommandContext(ctx, name, args...)
+	cmd.WaitDelay = 2 * time.Second
 	out, err := cmd.Output()
 	if err != nil {
 		return ""
