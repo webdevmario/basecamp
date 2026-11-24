@@ -5,6 +5,7 @@ import { generatePlaybook } from './playbook';
 import { useNotes, getNote, setNote } from './notes';
 import NoteModal from './NoteModal';
 import VersionDetail from './VersionDetail';
+import ConfigsView from './ConfigsView';
 
 // Fallback data for when no scan.json exists yet
 const EMPTY_DATA = {
@@ -156,6 +157,16 @@ export default function App() {
               </button>
             );
           })}
+          <button onClick={() => { setActiveCat('configs'); setShowPlaybook(false); }} style={{
+            display: 'flex', alignItems: 'center', gap: 9, width: '100%', padding: '8px 10px', borderRadius: 7,
+            border: 'none', cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit', fontSize: 13, marginTop: 6,
+            background: activeCat === 'configs' && !showPlaybook ? 'var(--accent-bg)' : 'transparent',
+            color: activeCat === 'configs' && !showPlaybook ? 'var(--accent)' : 'var(--fg2)',
+            fontWeight: activeCat === 'configs' && !showPlaybook ? 600 : 400,
+          }}>
+            <span style={{ fontSize: 14, width: 20, textAlign: 'center' }}>🗂</span>
+            <span style={{ flex: 1 }}>Configs</span>
+          </button>
         </div>
 
         <div style={{ padding: '10px 10px 14px', borderTop: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -216,6 +227,8 @@ go build -o basecamp .
               fontFamily: "'JetBrains Mono', monospace", whiteSpace: 'pre-wrap', wordBreak: 'break-all',
             }}>{playbook}</pre>
           </div>
+        ) : activeCat === 'configs' ? (
+          <ConfigsView />
         ) : cat ? (
           <div className="slide-in" key={activeCat}>
             <div style={{ padding: '24px 32px 0' }}>

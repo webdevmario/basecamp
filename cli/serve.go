@@ -63,6 +63,7 @@ func runServe(addr, webDir, dataDir string) {
 	})
 
 	registerNotesRoutes(mux, dataDir)
+	registerDotfilesRoutes(mux)
 
 	if webDir != "" {
 		webDir = expandHome(webDir)
