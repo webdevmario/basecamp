@@ -50,8 +50,8 @@ Mac (paths, hostnames, keys, dotfile contents).
 
 ## Open work (as of 2026-11-24)
 
-1. **Merge order:** PR #2 (pass 1) first, then #1 (dotfiles, stacked on #2) and the jobs PR
-   (rebased on #2). Before `git pull` in the main checkout, move aside its local edits to
+1. **Merge order:** PR #2 (pass 1) first, then #1 (dotfiles, stacked on #2) and #3 (jobs,
+   rebased on #2). Before `git pull` in the main checkout, move aside its local edits to
    `web/public/scan.json` and `cli/basecamp`, which #2 deletes. Public history: Mario decided on
    2026-11-24 to leave the old scan and binary in history (no secrets in them).
 2. **`basecamp diff`** is not built (the old README called it "coming soon").
