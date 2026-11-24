@@ -2,8 +2,9 @@ package main
 
 import (
 	"fmt"
-	"path/filepath"
 	"os"
+	"os/exec"
+	"path/filepath"
 	"strings"
 )
 
@@ -28,11 +29,21 @@ func scanRuntimes() Category {
 	} else if commandExists("python3") {
 		version := run("python3", "--version")
 		version = strings.TrimPrefix(version, "Python ")
+		note := ""
+		if p, _ := exec.LookPath("python3"); p == "/usr/bin/python3" {
+			note = "Apple's Command Line Tools Python"
+		}
 		items = append(items, Item{
-			Name:   "Python",
-			Detail: fmt.Sprintf("%s via system", version),
-			Status: "current",
+			Name:       "Python",
+			Detail:     fmt.Sprintf("%s via system", version),
+			Status:     "current",
+			SystemNote: note,
 		})
+	}
+
+	// Pythons managed by uv (uv python install)
+	if uvItem := scanPythonUV(); uvItem != nil {
+		items = append(items, *uvItem)
 	}
 
 	// Ruby via rbenv
@@ -382,4 +393,35 @@ func filterOut(list []string, exclude string) []string {
 		}
 	}
 	return result
+}
+
+// scanPythonUV lists Python versions uv installed itself (not system ones it can see).
+func scanPythonUV() *Item {
+	if !commandExists("uv") {
+		return nil
+	}
+	var versions []string
+	for _, line := range runLines("uv", "python", "list", "--only-installed") {
+		fields := strings.Fields(line)
+		if len(fields) < 2 || !strings.Contains(fields[1], "/uv/python/") {
+			continue
+		}
+		// "cpython-3.12.16-macos-aarch64-none"
+		if parts := strings.Split(fields[0], "-"); len(parts) > 1 {
+			versions = append(versions, parts[1])
+		}
+	}
+	if len(versions) == 0 {
+		return nil
+	}
+	note := ""
+	if len(versions) > 1 {
+		note = fmt.Sprintf("Also installed: %s", strings.Join(versions[1:], ", "))
+	}
+	return &Item{
+		Name:       "Python (uv)",
+		Detail:     fmt.Sprintf("%s via uv", versions[0]),
+		Status:     "current",
+		SystemNote: note,
+	}
 }

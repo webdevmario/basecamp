@@ -40,8 +40,8 @@ type Item struct {
 	UserNote   string `json:"userNote,omitempty"`
 
 	// For runtimes with version managers
-	VersionManager string          `json:"versionManager,omitempty"`
-	Versions       []VersionEntry  `json:"versions,omitempty"`
+	VersionManager string         `json:"versionManager,omitempty"`
+	Versions       []VersionEntry `json:"versions,omitempty"`
 }
 
 type VersionEntry struct {

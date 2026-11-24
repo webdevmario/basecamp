@@ -25,7 +25,7 @@ func scanSSHKeys() Category {
 	for _, entry := range entries {
 		name := entry.Name()
 		// Look for private key files (no extension, or specific patterns)
-		if strings.HasSuffix(name, ".pub") || name == "config" || name == "known_hosts" ||
+		if strings.HasSuffix(name, ".pub") || name == "config" || strings.HasPrefix(name, "known_hosts") ||
 			name == "authorized_keys" || strings.HasPrefix(name, ".") {
 			continue
 		}
@@ -39,6 +39,11 @@ func scanSSHKeys() Category {
 		// Read first line to detect key type
 		lines := readFileLines(fullPath)
 		if len(lines) == 0 {
+			continue
+		}
+
+		// Only private keys: everything else in ~/.ssh (backups, notes) is skipped.
+		if !strings.Contains(lines[0], "PRIVATE KEY") {
 			continue
 		}
 

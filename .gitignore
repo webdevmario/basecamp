@@ -1,5 +1,6 @@
 # Built output
 cli/basecamp
+cli/cli
 web/dist/
 web/node_modules/
 

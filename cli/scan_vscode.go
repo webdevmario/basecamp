@@ -32,6 +32,10 @@ func scanVSCode() Category {
 		displayName := id
 		if len(nameParts) > 1 {
 			displayName = nameParts[1]
+			// "vscode-eslint" and "svelte-vscode" read better without the "vscode"
+			if trimmed := strings.TrimSuffix(strings.TrimPrefix(displayName, "vscode-"), "-vscode"); trimmed != "" {
+				displayName = trimmed
+			}
 			// Convert kebab-case to title
 			displayName = strings.ReplaceAll(displayName, "-", " ")
 			displayName = strings.Title(displayName)

@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"strings"
 )
 
@@ -35,7 +36,8 @@ func scanDotfiles() Category {
 	}
 
 	var items []Item
-	currentShell := run("echo", "$SHELL")
+	currentShell := os.Getenv("SHELL")
+	hasNvimConfig := fileExists("~/.config/nvim/init.lua") || fileExists("~/.config/nvim/init.vim")
 
 	for _, df := range dotfiles {
 		if !fileExists(df.path) {
@@ -43,36 +45,28 @@ func scanDotfiles() Category {
 		}
 
 		lines := countFileLines(df.path)
-		modTime := fileModTime(df.path)
-		days := daysSince(modTime)
+		days := daysSince(fileModTime(df.path))
 
-		// Determine status
+		// "stale" means probably a leftover nothing reads anymore, not just "old":
+		// a config that works rarely needs editing.
 		status := "active"
 		systemNote := ""
-
-		// Detect stale configs
-		if days > 365 {
+		isBash := df.name == ".bashrc" || df.name == ".bash_profile" || df.name == ".profile"
+		switch {
+		case isBash && strings.HasSuffix(currentShell, "zsh"):
 			status = "stale"
-			systemNote = fmt.Sprintf("Last modified %d days ago", days)
-		}
-
-		// Shell-specific staleness
-		if strings.Contains(df.name, ".bash") && strings.Contains(currentShell, "zsh") {
-			if days > 180 {
-				status = "stale"
-				systemNote = "Bash config — current shell is zsh, may be leftover"
-			}
-		}
-
-		// Detect nvim vs vim
-		if df.name == ".vimrc" && (fileExists("~/.config/nvim/init.lua") || fileExists("~/.config/nvim/init.vim")) {
+			systemNote = "Your shell is zsh, which doesn't read this; likely a leftover (some installers still write here)"
+		case df.name == ".vimrc" && hasNvimConfig:
 			status = "stale"
-			systemNote = "nvim config detected — this .vimrc may be legacy"
-		}
-
-		// Build system note from file analysis
-		if systemNote == "" {
+			systemNote = "Neovim has its own config, so this .vimrc may be legacy"
+		case df.name == ".yarnrc" && !commandExists("yarn"):
+			status = "stale"
+			systemNote = "yarn isn't on your PATH, so nothing reads this"
+		default:
 			systemNote = analyzeDotfile(df.name, df.path, lines)
+		}
+		if days > 365 {
+			systemNote += fmt.Sprintf(" · last edited %.1f years ago", float64(days)/365)
 		}
 
 		detail := fmt.Sprintf("~/%s", df.name)
